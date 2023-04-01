@@ -1,0 +1,79 @@
+site_name: Cubic Craft
+site_description: "CS 284A final project, make a full world into cubes"
+edit_uri: ''
+repo_url: 'https://github.com/haoda-li/CS284A-cubic-craft'
+repo_name: 'haoda-li/CS284A-cubic-craft'
+copyright: 'Copyright &copy; 2023'
+use_directory_urls: true
+
+theme:
+  name: material
+  favicon: assets/logo.png
+  icon:
+    logo: material/cube-outline
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: green
+      accent: deep purple
+      toggle:
+        icon: material/lightbulb
+        name: Dark mode
+    - scheme: slate
+      accent: green
+      primary: deep purple
+      toggle:
+        icon: material/lightbulb-outline
+        name: Light mode
+
+nav:
+
+plugins:
+    - search
+    - glightbox
+    - bibtex:
+        bib_file: "docs/assets/refs.bib"
+        csl_file: "docs/assets/acm-siggraph.csl"
+        cite_inline: true
+    - minify:
+        minify_html: true
+        minify_js: true
+        minify_css: true
+        htmlmin_opts:
+            remove_comments: true
+  
+markdown_extensions:
+  - meta
+  - tables
+  - attr_list
+  - admonition
+  - pymdownx.mark
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+
+extra:
+  generator: false
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css
+  - assets/extra.css
+extra_javascript:
+  - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js
+  - assets/extra.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js
+
+
+copyright: Copyright &copy; 2017 - 2023 | Haoda Li
