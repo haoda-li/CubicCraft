@@ -1,9 +1,9 @@
 # Cubic Craft
 
 [Haoda Li](https://github.com/haoda-li), 
-[Puyuan Yi](#), 
-[XXXX](#), 
-[XXXX](#), 
+[Puyuan Yi](https://github.com/JamesYi2953), 
+[Victor Li](#), 
+[Zhen Jiang](#), 
 
 
 In this project, we present a stylization tool to automatically manipulate 3D objects into a cubic style. Our tool includes two parts: a cubic stylization algorithm [@cubic_style] to cubify the object while preserving the geometric details, and a voxelization algorithm to create a voxel representation. With our tool, 3D artists can create Minecraft-styled objects with ease. 
@@ -14,7 +14,30 @@ Non-realistic modeling can provide a unique art style for animations and video g
 
 ## Goals and Deliverables
 
+### What we plan to deliver
+
+- demo picture
+
+- metric (??)
+
+### What we hope to deliver
+
 ## Schedule
+
+### First week
+
+### Second week
+
+### Third week
+
+### Fourth week
+
+- Finish final deliverables, including project video, project webpage and final paper.
+
+- Prepare for final demo, including making presentation slides and rehearsal for presentation.
+
+- Code restructure, improve code readability.
+
 
 ## Resources
 - [Cubic Stylization](https://arxiv.org/pdf/1910.02926.pdf) [@cubic_style]
