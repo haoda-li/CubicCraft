@@ -21,7 +21,7 @@ Non-realistic modeling can provide a unique art style for animations and video g
 
 ### What we plan to deliver
 
-The final demo will be an interactive GUI for editing and displaying objects. The GUI will provide sliders for tuning the parameters, including cube orientation, "cubeness", and voxel resolution. Because cubic stylization is based on ARAP energy, ARAP deformation comes for free. The user will also be able to set up handle points and deform the object by dragging the points. The GUI will be able to run in real time and show the object's deformation. In addition, we will have an offline renderer to produce ray tracing based images.
+The final demo will be an interactive GUI for editing and displaying objects. The GUI will provide sliders for tuning the parameters, including cube orientation and "cubeness". Because cubic stylization is based on ARAP energy, ARAP deformation comes for free. The user will also be able to set up handle points and deform the object by dragging the points. The GUI will be able to run in real time and show the object's deformation. In addition, we will have an offline renderer to produce ray tracing based images.
 
 We are interested in testing the numerical stability and convergence speed of the cubic stylization algorithm. Also, how creative can the cubic style be. 
 
@@ -58,7 +58,7 @@ In addition, we can allow more controls and creativity. For example, the "cubene
 
 
 ## Resources
-We will mainly use C++ for the implementation. Ideally, the code will be cross-platform, but we will mainly work and test on Windows. 
+We will mainly use C++ for the implementation. Ideally, the code will be cross-platform, but we will mainly target at Windows platform. 
 
 Here is a list of papers and libraries we will use
 
