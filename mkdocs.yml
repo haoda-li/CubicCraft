@@ -27,25 +27,27 @@ theme:
         name: Light mode
 
 nav:
+  - Proposal: index.md
 
 plugins:
-    - search
-    - glightbox
-    - bibtex:
-        bib_file: "docs/assets/refs.bib"
-        csl_file: "docs/assets/acm-siggraph.csl"
-        cite_inline: true
-    - minify:
-        minify_html: true
-        minify_js: true
-        minify_css: true
-        htmlmin_opts:
-            remove_comments: true
+  - search
+  - glightbox
+  - bibtex:
+      bib_file: "docs/assets/refs.bib"
+      csl_file: "docs/assets/acm-siggraph.csl"
+      cite_inline: true
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
   
 markdown_extensions:
   - meta
   - tables
   - attr_list
+  - md_in_html
   - admonition
   - pymdownx.mark
   - pymdownx.emoji:
