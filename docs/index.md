@@ -21,7 +21,7 @@ Non-realistic modeling can provide a unique art style for animations and video g
 
 ### What we plan to deliver
 
-The final demo will be an interactive GUI for editing and displaying objects. The GUI will provide sliders for tuning the parameters, including cube orientation, "cubeness", and voxel resolution. Because cubic stylization is based on ARAP energy, ARAP deformation comes for free. The user will also be able to set up handle points and deform the object by dragging the points. The GUI will be able to run in real time and show the object's deformation. In addition, we will have an offline voxel renderer to produce ray tracing based images. We won't expect the ray tracing rendering to be real time. 
+The final demo will be an interactive GUI for editing and displaying objects. The GUI will provide sliders for tuning the parameters, including cube orientation, "cubeness", and voxel resolution. Because cubic stylization is based on ARAP energy, ARAP deformation comes for free. The user will also be able to set up handle points and deform the object by dragging the points. The GUI will be able to run in real time and show the object's deformation. In addition, we will have an offline renderer to produce ray tracing based images.
 
 We are interested in testing the numerical stability and convergence speed of the cubic stylization algorithm. Also, how creative can the cubic style be. 
 
@@ -36,16 +36,24 @@ In addition, we can allow more controls and creativity. For example, the "cubene
 
 ### First week
 
+- Read the paper and investigate the reference code.
+- Write code for the basic cubic stylization algorithm.
+
 ### Second week
 
+- Finish and test the basic cubic styliztion algorithm.
+- Write the GUI interface and include slides for tuning the parameters.
+
 ### Third week
+
+- Fix any existing minor bugs or issues.
+- Work on the stretch goal: accelerating the algorithm using GPU, if we have time.
+- Plug into renderer in order to generate images and record videos for deliverables.
 
 ### Fourth week
 
 - Finish final deliverables, including project video, project webpage and final paper.
-
 - Prepare for final demo, including making presentation slides and rehearsal for presentation.
-
 - Code restructure, improve code readability.
 
 
