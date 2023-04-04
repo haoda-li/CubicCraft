@@ -41,7 +41,7 @@ In addition, we can allow more controls and creativity. For example, the "cubene
 
 ### Second week
 
-- Finish and test the basic cubic styliztion algorithm.
+- Finish and test the basic cubic stylization algorithm.
 - Write the GUI interface and include slides for tuning the parameters.
 
 ### Third week
@@ -61,6 +61,7 @@ In addition, we can allow more controls and creativity. For example, the "cubene
 We will mainly use C++ for the implementation. Ideally, the code will be cross-platform, but we will mainly work and test on Windows. 
 
 Here is a list of papers and libraries we will use
+
 - [Cubic Stylization](https://arxiv.org/pdf/1910.02926.pdf) [@cubic_style] the algorithm we will use.
 - [As-rigid-as-possible surface modeling](https://igl.ethz.ch/projects/ARAP/arap_web.pdf) [@arap] makes the deformation problem an energy minimization problem, and cubic stylization is augmented on ARAP energy. 
 - [CGAL](https://www.cgal.org/)[@cgal] as the major software platform for CPU implementation. 
