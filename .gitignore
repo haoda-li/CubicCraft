@@ -34,3 +34,6 @@ site
 *.out
 *.app
 
+*.xml
+*.iml
+
