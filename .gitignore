@@ -37,3 +37,6 @@ site
 *.xml
 *.iml
 
+# ignore test
+test.py
+
