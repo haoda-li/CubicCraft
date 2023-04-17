@@ -108,7 +108,7 @@ def main():
 
 
     # load vertices, triangle and lambda
-    V = np.asarray(mesh.vertices)
+    V = np.asarray(mesh.vertices).astype(np.float32)
     F = np.asarray(mesh.triangles)
 
     data = cube_style_data(Lambda=Lambda)
@@ -126,7 +126,7 @@ def main():
 
     #precomputation ARAP and initialize ADMM parameters
     print("\033[1m[INFO] precomputation ARAP and initialize ADMM parameters ...\033[0m")
-    cube_style_precomputation(V, F, data)
+    V, F, data = cube_style_precomputation(V, F, data)
 
     #cubic stylization
     maxIter = 1000
