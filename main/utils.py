@@ -9,7 +9,6 @@ def test():
 
 def normalize_unitbox(V=None):
     '''
-
     :param V:a matrix of vertex positions
     :return: V: a matrix of vertex positions (in a unit box)
     '''
@@ -20,7 +19,6 @@ def normalize_unitbox(V=None):
     return V
 
 def cube_style_precomputation(V, F, data):
-
     '''
 
     :param V: a matrix of vertex positions
@@ -51,10 +49,10 @@ def cube_style_precomputation(V, F, data):
     # right-hand side constructor of global poisson solve for various ARAP energies
     data.K = arap_rhs(V, F, cols, igl.ARAP_ENERGY_TYPE_SPOKES_AND_RIMS)
 
-    for i in range(rows):
-        data.hEList.append([])
-        data.WVecList.append([])
-        data.dVList.append([])
+    # for i in range(rows):
+    #     data.hEList.append([])
+    #     data.WVecList.append([])
+    #     data.dVList.append([])
     """
     above code should equal to 
     data.hEList.resize(V.rows());
@@ -64,9 +62,12 @@ def cube_style_precomputation(V, F, data):
 
     for i in range(rows):
         adjF = adjFList[VI[i] : VI[i + 1]]
-        for _ in range(len(adjF) * 3):
-            data.hEList[i].append([0, 0])
-            data.WVecList[i].append([0])
+        # for _ in range(len(adjF) * 3):
+        #     data.hEList[i].append([0, 0])
+        #     data.WVecList[i].append([0])
+
+        data.hEList.append(np.zeros((len(adjF) * 3, 2)))
+        data.WVecList.append(np.zeros((len(adjF) * 3)))
         """
         above code should be equal to
         data.hEList[ii].resize(adjF.size()*3, 2);
@@ -83,11 +84,29 @@ def cube_style_precomputation(V, F, data):
             data.hEList[i][3 * j + 1][1] = v2
             data.hEList[i][3 * j + 2][0] = v2
             data.hEList[i][3 * j + 2][1] = v0
+            # compute WVec = vec(W)
+            data.WVecList[i][3 * j] = data.L[v0, v1]
+            data.WVecList[i][3 * j + 1] = data.L[v1, v2]
+            data.WVecList[i][3 * j + 2] = data.L[v2, v0]
 
+        # compute [dV] matrix for each vertex
+        data.dVList.append(np.zeros((3, len(adjF) * 3)))
 
+        V_hE0 = V[data.hEList[i][:, 0], :]
+        V_hE1 = V[data.hEList[i][:, 1], :]
+        """
+        this should have the same result as following codes:
+        igl::slice(V,data.hEList[ii].col(0),1,V_hE0);
+        igl::slice(V,data.hEList[ii].col(1),1,V_hE1);
+        """
+        data.dVList[i] = (V_hE1 - V_hE0).T
 
+    # TODO: igl::min_quad_with_fixed_precompute(data.L,data.b,SparseMatrix<double>(),false,data.solver_data);
 
-
+    
+    data.zAll = np.random.rand(3, rows)
+    data.uAll = np.random.rand(3, rows)
+    data.rhoAll = np.ones(rows) * data.rhoInit
 
     return V, F, data
 
