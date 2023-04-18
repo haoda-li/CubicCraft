@@ -141,7 +141,7 @@ def main():
 
     # create the mesh after cubic_stylization
     mesh_ac = o3d.geometry.TriangleMesh() # ac means after cubic
-    mesh_ac.vertices = o3d.utility.Vector3dVector(V)
+    mesh_ac.vertices = o3d.utility.Vector3dVector(U)
     mesh_ac.triangles = o3d.utility.Vector3iVector(F)
     mesh_ac.compute_vertex_normals()
     mesh_ac.compute_triangle_normals()

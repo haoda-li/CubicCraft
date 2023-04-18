@@ -151,6 +151,75 @@ def cube_style_single_iteration(V, U, data):
     return V, U, data
 
 
+def process_row_data(ii,V, U, RAll, data):
+    z = data.zAll[:, ii: ii + 1]
+    u = data.uAll[:, ii: ii + 1]
+    n = data.N[ii].T
+    rho = data.rhoAll[ii]
+
+    # get energy parameters
+    # Note: dVn = [dV n], dUn = [dU z-u]
+    hE = data.hEList[ii]
+
+    U_hE0 = U[hE[:, 0], :]
+    U_hE1 = U[hE[:, 1], :]
+    dU = (U_hE1 - U_hE0).T
+
+    dV = data.dVList[ii]
+    WVec = data.WVecList[ii]
+    Spre = dV * np.diag(WVec) * dU.T
+
+    R = np.zeros((3, 3))
+
+    # start to ADMM
+    for k in range(data.maxIter_ADMM):
+        # R step
+        S = Spre + (rho * n * (z - u).T)
+        R = orthogonal_procrustes(S)
+
+        # z step
+        zOld = z
+        z = shrinkage(R * n + u, data.Lambda * data.VA(ii) / rho, z)
+
+        # u step
+        u = u + R * n - z
+        # TODO: whether use out to substitue .noalias()
+
+        # compute residual
+        r_norm = np.linalg.norm((z - R * n))
+        s_norm = np.linalg.norm((-rho * (z - zOld)))
+
+        # rho step
+        if r_norm > data.mu * s_norm:
+            rho = data.tao * rho
+            u = u / data.tao
+        elif s_norm > data.mu * r_norm:
+            rho = rho / data.tao
+            u = u * data.tao
+
+        # stopping criteria
+        nz = float(len(z))
+        eps_pri = sqrt(2.0 * nz) * data.ABSTOL + data.RELTOL * max(np.linalg.norm(R * n), np.linalg.norm(z))
+        eps_dual = sqrt(1.0 * nz) * data.ABSTOL + data.RELTOL * (np.linalg.norm(rho * u))
+
+        if r_norm < eps_pri and s_norm < eps_dual:
+            # save parameters
+            data.zAll[:, ii: ii + 1] = z
+            data.uAll[:, ii: ii + 1] = u
+            data.rhoAll[ii] = rho
+            # Set the block of RAll to R
+            RAll[:, 3 * ii:3 * ii + 3] = R
+
+            # save objective
+            objVal = np.trace(0.5 * ((R * dV - dU) * np.diag(WVec) * (R * dV - dU).T)) + data.Lambda * data.VA[
+                ii] * np.sum(np.abs(R * n))
+            data.objValVec[ii] = objVal
+            break
+
+    # ADMM end
+    return V, U, RAll, data
+
+
 def fit_rotations_l1(V, U, RAll, data):
     """
     :param V: a matrix of vertex positions
@@ -164,71 +233,7 @@ def fit_rotations_l1(V, U, RAll, data):
     # TODO: DO not know how to substitue for igl::parallel_for, use pool instead
     with Pool(processes=1000) as pool:
         def process(ii):
-            z = data.zAll[:, ii : ii + 1]
-            u = data.uAll[:, ii : ii + 1]
-            n = data.N[ii].T
-            rho = data.rhoAll[ii]
-
-            # get energy parameters
-            # Note: dVn = [dV n], dUn = [dU z-u]
-            hE = data.hEList[ii]
-
-            U_hE0 = U[hE[:, 0], :]
-            U_hE1 = U[hE[:, 1], :]
-            dU = (U_hE1 - U_hE0).T
-
-            dV = data.dVList[ii]
-            WVec = data.WVecList[ii]
-            Spre = dV * np.diag(WVec) * dU.T
-
-            R = np.zeros((3, 3))
-
-            # start to ADMM
-            for k in range(data.maxIter_ADMM):
-                # R step
-                S = Spre + (rho * n * (z - u).T)
-                R = orthogonal_procrustes(S)
-
-                # z step
-                zOld = z
-                z = shrinkage(R * n + u, data.Lambda * data.VA(ii) / rho, z)
-
-                # u step
-                u = u + R * n - z
-                # TODO: whether use out to substitue .noalias()
-
-                #compute residual
-                r_norm = np.linalg.norm((z - R * n))
-                s_norm = np.linalg.norm((-rho * (z - zOld)))
-
-                # rho step
-                if r_norm > data.mu * s_norm:
-                    rho = data.tao * rho
-                    u = u / data.tao
-                elif s_norm > data.mu * r_norm:
-                    rho = rho / data.tao
-                    u = u * data.tao
-
-                # stopping criteria
-                nz = float(len(z))
-                eps_pri = sqrt(2.0 * nz) * data.ABSTOL + data.RELTOL * max(np.linalg.norm(R * n), np.linalg.norm(z))
-                eps_dual = sqrt(1.0 * nz) * data.ABSTOL + data.RELTOL * (np.linalg.norm(rho * u))
-
-                if r_norm < eps_pri and s_norm < eps_dual:
-                    #save parameters
-                    data.zAll[:, ii : ii + 1] = z
-                    data.uAll[:, ii : ii + 1] = u
-                    data.rhoAll[ii] = rho
-                    # Set the block of RAll to R
-                    RAll[:, 3 * ii:3 * ii + 3] = R
-
-                    # save objective
-                    objVal = np.trace(0.5 * ((R * dV - dU) * np.diag(WVec) * (R * dV - dU).T)) + data.Lambda * data.VA[ii] * np.sum(np.abs(R * n))
-                    data.objValVec[ii] = objVal
-                    break
-
-            # ADMM end
-            return V, U, RAll, data
+            return process_row_data(ii, V, U, RAll, data)
 
         V, U, RAll, data = pool.map(process, range(V.shape[0]))
 
