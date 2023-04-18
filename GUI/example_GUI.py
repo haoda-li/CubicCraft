@@ -301,10 +301,18 @@ class AppWindow:
         self._settings_panel.add_fixed(separation_height)
         self._settings_panel.add_child(view_ctrls)
 
+        # How to get those settings?
+        # todo: add on_change function
+        cubic = gui.CollapsableVert("Cubic", 0, gui.Margins(em, 0, 0, 0))
+        cubic.set_is_open(True)
+        cubic.add_child(gui.Label("Test"))
+        cubic.add_child(gui.Slider(gui.Slider.INT))
+        self._settings_panel.add_child(cubic)
+
         advanced = gui.CollapsableVert("Advanced lighting", 0,
                                        gui.Margins(em, 0, 0, 0))
         advanced.set_is_open(False)
-
+        
         self._use_ibl = gui.Checkbox("HDR map")
         self._use_ibl.set_on_checked(self._on_use_ibl)
         self._use_sun = gui.Checkbox("Sun")
