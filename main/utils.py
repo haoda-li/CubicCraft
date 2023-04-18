@@ -231,12 +231,13 @@ def fit_rotations_l1(V, U, RAll, data):
     data.objValVec = np.zeros(len(V))
 
     # TODO: DO not know how to substitue for igl::parallel_for, use pool instead
-    with Pool(processes=1000) as pool:
-        def process(ii):
-            return process_row_data(ii, V, U, RAll, data)
-
-        V, U, RAll, data = pool.map(process, range(V.shape[0]))
-
+    # with Pool(processes=1000) as pool:
+    #     def process(ii):
+    #         return process_row_data(ii, V, U, RAll, data)
+    #
+    #     V, U, RAll, data = pool.map(process, range(V.shape[0]))
+    for ii in range(len(V)):
+        V, U, RAll, data = process_row_data(ii, V, U, RAll, data)
     data.objVal = np.sum(data.objValVec)
     return V, U, RAll, data
 
