@@ -8,7 +8,7 @@ from utils import normalize_unitbox, cube_style_precomputation, cube_style_singl
 
 
 parser = argparse.ArgumentParser(description='The algorithm of cubic stylization')
-parser.add_argument("--path", type=str, default="../GUI/bunnny.ply")
+parser.add_argument("--path", type=str, default="../GUI/bunny.ply")
 parser.add_argument('--Lambda', type=float, default=0.20)
 
 class cube_style_data():
