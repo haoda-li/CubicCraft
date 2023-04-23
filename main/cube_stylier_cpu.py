@@ -121,7 +121,8 @@ class CubeStylier:
         
         
 cube = CubeStylier("../meshes/bunny.obj")
-for _ in range(10):
+for i in range(10):
+    print(f"\033[34m[INFO] Interation step: {i}\033[0m")
     cube.step()
     
 igl.write_triangle_mesh("result.obj", cube.U, cube.F)
