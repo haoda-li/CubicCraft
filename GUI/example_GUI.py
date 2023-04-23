@@ -741,27 +741,27 @@ class AppWindow:
         if judge_temp == False:
             # Add the text
             dlg_layout.add_child(gui.Label("No 3D model, load a model first!"))
+            # Add the Ok button. We need to define a callback function to handle
+            # the click.
+            ok = gui.Button("OK")
+            ok.set_on_clicked(self._on_about_ok)
+
+            # We want the Ok button to be an the right side, so we need to add
+            # a stretch item to the layout, otherwise the button will be the size
+            # of the entire row. A stretch item takes up as much space as it can,
+            # which forces the button to be its minimum size.
+            h = gui.Horiz()
+            h.add_stretch()
+            h.add_child(ok)
+            h.add_stretch()
+            dlg_layout.add_child(h)
+
+            dlg.add_child(dlg_layout)
+            self.window.show_dialog(dlg)
         else:
             dlg_layout.add_child(gui.Label("Start to do the cubic stylization!"))
             self.load_cubic_style(self.file_path)
 
-        # Add the Ok button. We need to define a callback function to handle
-        # the click.
-        ok = gui.Button("OK")
-        ok.set_on_clicked(self._on_about_ok)
-
-        # We want the Ok button to be an the right side, so we need to add
-        # a stretch item to the layout, otherwise the button will be the size
-        # of the entire row. A stretch item takes up as much space as it can,
-        # which forces the button to be its minimum size.
-        h = gui.Horiz()
-        h.add_stretch()
-        h.add_child(ok)
-        h.add_stretch()
-        dlg_layout.add_child(h)
-
-        dlg.add_child(dlg_layout)
-        self.window.show_dialog(dlg)
 
     def _on_about_ok(self):
         self.window.close_dialog()
