@@ -28,6 +28,7 @@ theme:
 
 nav:
   - Proposal: index.md
+  - Milestone: index.md
 
 plugins:
   - search
