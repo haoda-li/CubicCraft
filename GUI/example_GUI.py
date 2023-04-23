@@ -7,6 +7,12 @@ import os
 import platform
 import sys
 
+'''
+get to the main
+'''
+sys.path.append('../main')
+from cube_stylier_cpu import *
+
 isMacOS = (platform.system() == "Darwin")
 
 
@@ -183,6 +189,10 @@ class AppWindow:
     MENU_QUIT = 3
     MENU_SHOW_SETTINGS = 11
     MENU_ABOUT = 21
+    """
+    add menu_cubic, wondering what the result is
+    """
+    MENU_CUBIC = 31
 
     DEFAULT_IBL = "default"
 
@@ -204,6 +214,9 @@ class AppWindow:
         self._scene = gui.SceneWidget()
         self._scene.scene = rendering.Open3DScene(w.renderer)
         self._scene.set_on_sun_direction_changed(self._on_sun_dir)
+
+        ### record filename
+        self.file_path = ""
 
         # ---- Settings panel ----
         # Rather than specifying sizes in pixels, which may vary in size based
@@ -431,6 +444,12 @@ class AppWindow:
             help_menu = gui.Menu()
             help_menu.add_item("About", AppWindow.MENU_ABOUT)
 
+            """
+            add cubic stylization code
+            """
+            cubic_style_menu = gui.Menu()
+            cubic_style_menu.add_item("Start to cube stylization", AppWindow.MENU_CUBIC)
+
             menu = gui.Menu()
             if isMacOS:
                 # macOS will name the first menu item for the running application
@@ -440,12 +459,14 @@ class AppWindow:
                 menu.add_menu("Example", app_menu)
                 menu.add_menu("File", file_menu)
                 menu.add_menu("Settings", settings_menu)
+                menu.add_menu("Cubic stylization", cubic_style_menu)
                 # Don't include help menu unless it has something more than
                 # About...
             else:
                 menu.add_menu("File", file_menu)
                 menu.add_menu("Settings", settings_menu)
                 menu.add_menu("Help", help_menu)
+                menu.add_menu("Cubic stylization", cubic_style_menu)
             gui.Application.instance.menubar = menu
 
         # The menubar is global, but we need to connect the menu items to the
@@ -457,7 +478,12 @@ class AppWindow:
         w.set_on_menu_item_activated(AppWindow.MENU_QUIT, self._on_menu_quit)
         w.set_on_menu_item_activated(AppWindow.MENU_SHOW_SETTINGS,
                                      self._on_menu_toggle_settings_panel)
-        w.set_on_menu_item_activated(AppWindow.MENU_ABOUT, self._on_menu_about)
+        w.set_on_menu_item_activated(AppWindow.MENU_CUBIC, self._on_menu_cubic)
+
+        """
+        add a new AppWindow item
+        """
+        w.set_on_menu_item_activated(AppWindow.MENU_ABOUT, self._on_menu_cubic)
         # ----
 
         self._apply_settings()
@@ -645,6 +671,7 @@ class AppWindow:
         self.window.close_dialog()
 
     def _on_load_dialog_done(self, filename):
+        self.file_path = filename
         self.window.close_dialog()
         self.load(filename)
 
@@ -679,6 +706,44 @@ class AppWindow:
         # Add the text
         dlg_layout = gui.Vert(em, gui.Margins(em, em, em, em))
         dlg_layout.add_child(gui.Label("Open3D GUI Example"))
+
+        # Add the Ok button. We need to define a callback function to handle
+        # the click.
+        ok = gui.Button("OK")
+        ok.set_on_clicked(self._on_about_ok)
+
+        # We want the Ok button to be an the right side, so we need to add
+        # a stretch item to the layout, otherwise the button will be the size
+        # of the entire row. A stretch item takes up as much space as it can,
+        # which forces the button to be its minimum size.
+        h = gui.Horiz()
+        h.add_stretch()
+        h.add_child(ok)
+        h.add_stretch()
+        dlg_layout.add_child(h)
+
+        dlg.add_child(dlg_layout)
+        self.window.show_dialog(dlg)
+
+    def _on_menu_cubic(self):
+        # Show a simple dialog. Although the Dialog is actually a widget, you can
+        # treat it similar to a Window for layout and put all the widgets in a
+        # layout which you make the only child of the Dialog.
+        em = self.window.theme.font_size
+        dlg = gui.Dialog("About")
+
+        if self._scene.scene.has_geometry("__model__"):
+            judge_temp = True
+        else:
+            judge_temp = False
+
+        dlg_layout = gui.Vert(em, gui.Margins(em, em, em, em))
+        if judge_temp == False:
+            # Add the text
+            dlg_layout.add_child(gui.Label("No 3D model, load a model first!"))
+        else:
+            dlg_layout.add_child(gui.Label("Start to do the cubic stylization!"))
+            self.load_cubic_style(self.file_path)
 
         # Add the Ok button. We need to define a callback function to handle
         # the click.
@@ -735,6 +800,32 @@ class AppWindow:
                     # Point cloud
                     self._scene.scene.add_geometry("__model__", geometry,
                                                    self.settings.material)
+                bounds = self._scene.scene.bounding_box
+                self._scene.setup_camera(60, bounds, bounds.get_center())
+            except Exception as e:
+                print(e)
+
+    def load_cubic_style(self, path):
+        self._scene.scene.clear_geometry()
+        cube = CubeStylier(path)
+        cube.iterate()
+        # mesh = o3d.geometry.TriangleMesh()
+        # mesh.vertices = o3d.utility.Vector3dVector(cube.U)
+        # mesh.triangles = o3d.utility.Vector3iVector(cube.F)
+        # mesh.compute_vertex_normals()
+        # mesh.compute_triangle_normals()
+        final_mesh = rendering.TriangleMeshModel(cube.U, cube.F)
+        # try:
+        #     final_mesh = rendering.TriangleMeshModel(mesh)
+        # except Exception as e:
+        #     print(e)
+        print(final_mesh)
+
+        #
+        if final_mesh  is not None:
+            # Triangle model
+            try:
+                self._scene.scene.add_model("__model__", final_mesh)
                 bounds = self._scene.scene.bounding_box
                 self._scene.setup_camera(60, bounds, bounds.get_center())
             except Exception as e:

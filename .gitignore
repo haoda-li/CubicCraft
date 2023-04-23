@@ -38,6 +38,7 @@ site
 
 # ignore test
 test.py
+result.obj
 
 .DS_Store
 */.DS_Store

@@ -118,11 +118,21 @@ class CubeStylier:
         Bcol = self.arap_rhs @ Rcol
         B = Bcol.reshape(int(Bcol.shape[0] / 3), 3, order='F')
         _, self.U = igl.min_quad_with_fixed(self.L, B, self.handles, self.handles_pos, Aeq, Beq, False)
+
+    def iterate(self, step_num=10):
+        for i in range(step_num):
+            print(f"\033[34m[INFO] Interation step: {i}\033[0m")
+            self.step()
+
+
         
-        
-cube = CubeStylier("../meshes/bunny.obj")
-for i in range(10):
-    print(f"\033[34m[INFO] Interation step: {i}\033[0m")
-    cube.step()
-    
-igl.write_triangle_mesh("result.obj", cube.U, cube.F)
+def main():
+    cube = CubeStylier("../meshes/bunny.obj")
+
+    cube.iterate(10)
+
+    igl.write_triangle_mesh("result.obj", cube.U, cube.F)
+
+
+if __name__ == '__main__':
+    main()
