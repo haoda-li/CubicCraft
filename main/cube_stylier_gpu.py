@@ -1,7 +1,9 @@
 import taichi as ti
+from scipy.sparse import csc_matrix
 import igl
 import numpy as np
 ti.init(arch=ti.gpu)
+
 
 
 @ti.data_oriented
@@ -12,6 +14,7 @@ class CubeStylizer:
         NV = V.shape[0]
         # compute necessary geometry properties
         L = igl.cotmatrix(V, F)  # NV * NV sparse
+        self.L = L
         N = igl.per_vertex_normals(V, F)  # NV * 3
         VA = igl.massmatrix(V, F).diagonal() # NV
         # vertex_face_adj[vf_indices[i]:vf_indices[i+1]] is the face indices adjacent to V[i]
@@ -27,7 +30,7 @@ class CubeStylizer:
         self.RELTOL = 1e-3,
         self.mu = 5,
         self.tao = 2, 
-        self.maxIter_ADMM = 100
+        self.maxIter_ADMM = 20
         
         # set_up taichi field for parallelized local step
         self.V = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f32)
@@ -98,7 +101,7 @@ class CubeStylizer:
     @staticmethod
     @ti.func
     def shrinkage(x, k):
-        return ti.max(x-k, 0) - ti.max(-x-k, 0)
+        return ti.max(x-k[0], 0) - ti.max(-x-k[0], 0)
     
     @ti.kernel
     def fit_rotation_l1(self):
@@ -128,8 +131,33 @@ class CubeStylizer:
                 R = self.fit_R(S)
                 z_old = z
                 z = self.shrinkage(R @ n + u, self.cubeness * self.vertex_area[vi] / rho)
-        
+                u += R @ n - z
+                r_norm = (z - R @ n).norm()
+                s_norm = (-rho * (z - z_old)).norm()
+                
+                if r_norm > self.mu * s_norm:
+                    rho *= self.tao
+                    u /= self.tao
+                elif s_norm > self.mu * r_norm:
+                    rho /= self.tao
+                    u *= self.tao
+                    
+                self.zAll[vi] = z
+                self.uAll[vi] = u
+                self.rhoAll[vi] = rho
+                self.RAll[vi] = R
+    
+    def step(self, b, bc):
+        Aeq = csc_matrix((0, 0))
+        Beq = np.array([])
+        Rcol = self.RAll.to_numpy().reshape(self.V.shape[0] * 3 * 3, 1, order="F")
+        Bcol = self.arap_rhs @ Rcol
+        B = Bcol.reshape(int(Bcol.shape[0] / 3), 3, order='F')
+        _, U = igl.min_quad_with_fixed(self.L, B, b, bc, Aeq, Beq, False)
+        self.U.from_numpy(U)
 cube = CubeStylizer("../meshes/bunny.obj")
-        
-        
-cube.fit_rotation_l1()
+b = np.array([999])
+bc = cube.V[999].to_numpy()[None, :]
+for _ in range(50):
+    cube.step(b, bc)
+igl.write_triangle_mesh("result.obj", cube.U.to_numpy(), cube.F.to_numpy())
