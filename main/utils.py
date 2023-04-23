@@ -1,8 +1,5 @@
 import numpy as np
-import open3d as o3d
-import scipy.sparse as sp
-from igl import *
-from multiprocessing import Pool
+import igl
 from math import sqrt
 
 def test():
@@ -33,15 +30,15 @@ def cube_style_precomputation(V, F, data):
     cols = V.shape[1]
 
     # extract the per-vertex normals as a NumPy array
-    data.N = per_vertex_normals(V, F)
+    data.N = igl.per_vertex_normals(V, F)
     # compute the cotangent Laplacian matrix of a triangular mesh
-    data.L = cotmatrix(V, F)
+    data.L = igl.cotmatrix(V, F)
     # compute the barycentric mass matrix
-    M = massmatrix(V, F, type=igl.MASSMATRIX_TYPE_BARYCENTRIC)
+    M = igl.massmatrix(V, F, type=igl.MASSMATRIX_TYPE_BARYCENTRIC)
     data.VA = M.diagonal()
 
     # computer vertex triangle adjaceny
-    adjFList, VI = vertex_triangle_adjacency(F, rows)
+    adjFList, VI = igl.vertex_triangle_adjacency(F, rows)
     """
     example output of adjaceny list
     adjFList: [0 1 2 0 2 0 1 1 2]
@@ -49,7 +46,7 @@ def cube_style_precomputation(V, F, data):
     """
 
     # right-hand side constructor of global poisson solve for various ARAP energies
-    data.K = arap_rhs(V, F, cols, igl.ARAP_ENERGY_TYPE_SPOKES_AND_RIMS)
+    data.K = igl.arap_rhs(V, F, cols, igl.ARAP_ENERGY_TYPE_SPOKES_AND_RIMS)
 
     # for i in range(rows):
     #     data.hEList.append([])
@@ -167,7 +164,7 @@ def process_row_data(ii,V, U, RAll, data):
 
     dV = data.dVList[ii]
     WVec = data.WVecList[ii]
-    Spre = dV * np.diag(WVec) * dU.T
+    Spre = dV @ np.diag(WVec) @ dU.T
 
     R = np.zeros((3, 3))
 
@@ -179,7 +176,7 @@ def process_row_data(ii,V, U, RAll, data):
 
         # z step
         zOld = z
-        z = shrinkage(R * n + u, data.Lambda * data.VA(ii) / rho, z)
+        z = shrinkage(R * n + u, data.Lambda * data.VA[ii] / rho)
 
         # u step
         u = u + R * n - z
@@ -247,27 +244,15 @@ def orthogonal_procrustes(S):
     :return: using SVD to calculate the rotation matrix R
     """
     # Compute the SVD of the matrix
+    print(S)
     SU, C, SV = np.linalg.svd(S)
     R = SV * SU.T
     if np.linalg.det(R) < 0:
         SU[:, 2] = -SU[:, 2]
         R = SV * SU.T
 
-    assert (R.determinant() > 0), "the determinant of rotation matrix is smaller than 0"
+    assert (np.linalg.det(R) > 0), "the determinant of rotation matrix is smaller than 0"
     return R
 
-def shrinkage(x, k, z):
-    """
-    :param x: a vector
-    :param k: a constant
-    :param z:
-    :return:
-    """
-    tmp1 = x - k
-    posMax = np.maximum(tmp1, 0.0).max()
-
-    tmp2 = -1 * x - k
-    negMax = np.maximum(tmp2, 0.0).max()
-
-    z = posMax - negMax
-    return z
+def shrinkage(x, k):
+    return np.max(x - k, 0) - np.max(-x-k, 0)
