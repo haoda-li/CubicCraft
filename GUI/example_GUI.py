@@ -6,7 +6,7 @@ import open3d.visualization.rendering as rendering
 import os
 import platform
 import sys
-
+import time
 '''
 get to the main
 '''
@@ -217,6 +217,12 @@ class AppWindow:
 
         ### record filename
         self.file_path = ""
+
+        """
+        save_temp_mesh
+        """
+        self.temp_mesh = None
+        self.cube = None
 
         # ---- Settings panel ----
         # Rather than specifying sizes in pixels, which may vary in size based
@@ -760,7 +766,10 @@ class AppWindow:
             self.window.show_dialog(dlg)
         else:
             dlg_layout.add_child(gui.Label("Start to do the cubic stylization!"))
-            self.load_cubic_style(self.file_path)
+            for i in range(10):
+                print(f"\033[34m[INFO] Interation step: {i}\033[0m")
+                self.load_cubic_style()
+                self._scene.force_redraw()
 
 
     def _on_about_ok(self):
@@ -796,6 +805,11 @@ class AppWindow:
                 if mesh is not None:
                     # Triangle model
                     self._scene.scene.add_model("__model__", mesh)
+
+                    """
+                    add self.cube
+                    """
+                    self.cube = CubeStylier(path)
                 else:
                     # Point cloud
                     self._scene.scene.add_geometry("__model__", geometry,
@@ -805,30 +819,21 @@ class AppWindow:
             except Exception as e:
                 print(e)
 
-    def load_cubic_style(self, path):
-        self._scene.scene.clear_geometry()
-        cube = CubeStylier(path)
-        cube.iterate()
+    def load_cubic_style(self):
+        self.cube.step()
         mesh = o3d.geometry.TriangleMesh()
-        mesh.vertices = o3d.utility.Vector3dVector(cube.U)
-        mesh.triangles = o3d.utility.Vector3iVector(cube.F)
+        mesh.vertices = o3d.utility.Vector3dVector(self.cube.U)
+        mesh.triangles = o3d.utility.Vector3iVector(self.cube.F)
         mesh.compute_vertex_normals()
         mesh.compute_triangle_normals()
-        # final_mesh = rendering.TriangleMeshModel()
-        # final_mesh.meshes = mesh
-        # # try:
-        # #     final_mesh = rendering.TriangleMeshModel(mesh)
-        # # except Exception as e:
-        # #     print(e)
-        # print(final_mesh)
-
-        #
+        self._scene.scene.clear_geometry()
         if mesh is not None:
             # Triangle model
             try:
                 self._scene.scene.add_geometry("__model__", mesh, self.settings.material)
-                bounds = self._scene.scene.bounding_box
-                self._scene.setup_camera(60, bounds, bounds.get_center())
+                self._scene.force_redraw()
+                # bounds = self._scene.scene.bounding_box
+                # self._scene.setup_camera(60, bounds, bounds.get_center())
             except Exception as e:
                 print(e)
 
