@@ -809,23 +809,24 @@ class AppWindow:
         self._scene.scene.clear_geometry()
         cube = CubeStylier(path)
         cube.iterate()
-        # mesh = o3d.geometry.TriangleMesh()
-        # mesh.vertices = o3d.utility.Vector3dVector(cube.U)
-        # mesh.triangles = o3d.utility.Vector3iVector(cube.F)
-        # mesh.compute_vertex_normals()
-        # mesh.compute_triangle_normals()
-        final_mesh = rendering.TriangleMeshModel(cube.U, cube.F)
-        # try:
-        #     final_mesh = rendering.TriangleMeshModel(mesh)
-        # except Exception as e:
-        #     print(e)
-        print(final_mesh)
+        mesh = o3d.geometry.TriangleMesh()
+        mesh.vertices = o3d.utility.Vector3dVector(cube.U)
+        mesh.triangles = o3d.utility.Vector3iVector(cube.F)
+        mesh.compute_vertex_normals()
+        mesh.compute_triangle_normals()
+        # final_mesh = rendering.TriangleMeshModel()
+        # final_mesh.meshes = mesh
+        # # try:
+        # #     final_mesh = rendering.TriangleMeshModel(mesh)
+        # # except Exception as e:
+        # #     print(e)
+        # print(final_mesh)
 
         #
-        if final_mesh  is not None:
+        if mesh is not None:
             # Triangle model
             try:
-                self._scene.scene.add_model("__model__", final_mesh)
+                self._scene.scene.add_geometry("__model__", mesh, self.settings.material)
                 bounds = self._scene.scene.bounding_box
                 self._scene.setup_camera(60, bounds, bounds.get_center())
             except Exception as e:
