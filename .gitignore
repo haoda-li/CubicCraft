@@ -45,3 +45,4 @@ result.obj
 */__pycache__
 
 .vscode/*
+main/imgui.ini
