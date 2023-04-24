@@ -14,60 +14,39 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
   <figcaption>Demonstration figure from Cubic Stylization</figcaption>
 </figure>
 
-## Problem Description
-Non-realistic modeling can provide a unique art style for animations and video games. One of the most popular area for non-realistic modeling is voxel art. The cube-like looking is very interesting and attractive. There are many 3D editing software that can converts arbitrary meshes to voxels. However, voxelization works on local scale and cannot convert the general geometric shape. In our project, we use a cubic stylization algorithm to stylize the object into a cubic shape. Therefore, the object have a cubic look. 
+## External Links
 
-## Goals and Deliverables
+- [Our slides](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link)
+- [Our video](https://drive.google.com/file/d/1zCyl1HJOp3MiYYKhZTIQK5oc2nY-kC44/view?usp=share_link)
 
-### What we plan to deliver
+## Current Progress
 
-The final demo will be an interactive GUI for editing and displaying objects. The GUI will provide sliders for tuning the parameters, including cube orientation and "cubeness". Because cubic stylization is based on ARAP energy, ARAP deformation comes for free. The user will also be able to set up handle points and deform the object by dragging the points. The GUI will be able to run in real time and show the object's deformation. In addition, we will have an offline renderer to produce ray tracing based images.
+- We have successfully finished our base-line algorithm of CPU-based cubic stylization. Given a mesh, our cubic craft algorithm
+ stylize the object into a cubic shape. Therefore, the object have a cubic look. We did experiments based
+ on several traditional meshes, such as bunny.obj and armadillo.obj. Here are the sample pictures for reference:
 
-We are interested in testing the numerical stability and convergence speed of the cubic stylization algorithm. Also, how creative can the cubic style be. 
+ <figure markdown>
+  ![](assets/cubic.jpg)
+  <figcaption>Demonstration figure from Cubic Stylization</figcaption>
+</figure>
 
-### What we hope to deliver
+- We have created a GUI for users to directly interact with our implemented cubic craft algorithm. This GUI provides sliders 
+for tuning the parameters, including cube orientation and "cubeness". In addition, this GUI has lots of basic
+graphic functions such as changing the environment light and changing the mesh's material. Here are the sample pictures
+for your reference:
 
-If there are enough time, we are interested in accelerating the algorithm using GPU for more complex meshes. Alternatively, we want to implement mesh decimation so that we we can estimate a simplified mesh, perform cubic stylization, and recover the original mesh after convergence. 
+<figure markdown>
+  ![](assets/cubic.jpg)
+  <figcaption>Demonstration figure from Cubic Stylization</figcaption>
+</figure>
 
-In addition, we can allow more controls and creativity. For example, the "cubeness" can be axis-specific so that the final shape is a cuboid (3D rectangle) instead a right cube. Also, we can expand the algorithm to create other polygon shapes. 
+## Future works
 
+- Our current cubic stylization is CPU-based, which takes a long time to run the algorithm. It will
+take nearly 30 seconds to run 10 iterations on bunny mesh and take several minutes to run 10 iterations on
+armadillo. To accelerate our algorithm, we will utilize Taichi to implement a GPU-based cubic stylization algorithm.
 
-## Schedule
-
-### First week
-
-- Read the paper and investigate the reference code.
-- Write code for the basic cubic stylization algorithm.
-
-### Second week
-
-- Finish and test the basic cubic stylization algorithm.
-- Write the GUI interface and include slides for tuning the parameters.
-
-### Third week
-
-- Fix any existing minor bugs or issues.
-- Work on the stretch goal: accelerating the algorithm using GPU, if we have time.
-- Plug into renderer in order to generate images and record videos for deliverables.
-
-### Fourth week
-
-- Finish final deliverables, including project video, project webpage and final paper.
-- Prepare for final demo, including making presentation slides and rehearsal for presentation.
-- Code restructure, improve code readability.
-
-
-## Resources
-We will mainly use C++ for the implementation. Ideally, the code will be cross-platform, but we will mainly target at Windows platform. 
-
-Here is a list of papers and libraries we will use
-
-- [Cubic Stylization](https://arxiv.org/pdf/1910.02926.pdf) [@cubic_style] the algorithm we will use.
-- [As-rigid-as-possible surface modeling](https://igl.ethz.ch/projects/ARAP/arap_web.pdf) [@arap] makes the deformation problem an energy minimization problem, and cubic stylization is augmented on ARAP energy. 
-- [CGAL](https://www.cgal.org/)[@cgal] as the major software platform for CPU implementation. 
-- [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) for linear algebra and sparse solver. 
-- [ImGUI](https://github.com/ocornut/imgui) as the major platform for GUI. 
-- [Taichi language](https://docs.taichi-lang.org/) [@hu2019taichi] If GPU optimization is possible, we can also implement cubic stylization as a Taichi kernel. 
+- Building handle functions. Based on this functions, users will also be able to set up handle points and deform the object by dragging the points.
 
 
 ## References
