@@ -25,8 +25,8 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
  stylize the object into a cubic shape. Therefore, the object have a cubic look. We did experiments based
  on several traditional meshes, such as bunny.obj and armadillo.obj. Here are the sample pictures for reference:
 
- <figure markdown>
-  ![](assets/cubic.jpg)
+<figure markdown>
+  ![](./assets/cubic.jpg)
   <figcaption>Demonstration figure from Cubic Stylization</figcaption>
 </figure>
 

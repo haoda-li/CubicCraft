@@ -5,7 +5,6 @@ import numpy as np
 ti.init(arch=ti.gpu)
 
 
-
 @ti.data_oriented
 class CubeStylizer:
     def __init__(self, mesh_file=None, V=None, F=None) -> None:
@@ -98,13 +97,13 @@ class CubeStylizer:
     @staticmethod    
     @ti.func
     def fit_R(S):
-        U, S, V = ti.svd(S)
-        R = V.transpose() @ U
+        U, X, V = ti.svd(S)
+        R = V @ U.transpose()
         if R.determinant() < 0:
             U[0, 2] *= -1
             U[1, 2] *= -1
             U[2, 2] *= -1
-            R = V.transpose() @ U
+            R = V @ U.transpose()
         return R
     
     @staticmethod
@@ -142,9 +141,9 @@ class CubeStylizer:
                 z = self.shrinkage(R @ n + u, self.cubeness * self.vertex_area[vi] / rho)
                 u += R @ n - z
                 
+                
                 r_norm = (z - R @ n).norm()
                 s_norm = (-rho * (z - z_old)).norm()
-                print(r_norm, s_norm)
                 if r_norm > self.mu * s_norm:
                     rho *= self.tao
                     u /= self.tao
@@ -156,7 +155,6 @@ class CubeStylizer:
                 self.uAll[vi] = u
                 self.rhoAll[vi] = rho
                 self.RAll[vi] = R
-    
     def step(self):
         Aeq = csc_matrix((0, 0))
         Beq = np.array([])
@@ -166,7 +164,19 @@ class CubeStylizer:
         B = Bcol.reshape(int(Bcol.shape[0] / 3), 3, order='F')
         _, U = igl.min_quad_with_fixed(self.L, B, self.handles, self.handles_pos, Aeq, Beq, False)
         self.U.from_numpy(U)
-cube = CubeStylizer("../meshes/bunny.obj")
-for _ in range(1):
-    cube.step()
-igl.write_triangle_mesh("result.obj", cube.U.to_numpy(), cube.F.to_numpy())
+        
+    def iterate(self, step_num=10):
+        for i in range(step_num):
+            print(f"\033[34m[INFO] Interation step: {i}\033[0m")
+            self.step()
+            
+
+        
+def main():
+    cube = CubeStylizer("../meshes/bunny.obj")
+    cube.iterate(10)
+    igl.write_triangle_mesh("result.obj", cube.U.to_numpy(), cube.F.to_numpy())
+
+
+if __name__ == '__main__':
+    main()

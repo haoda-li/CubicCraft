@@ -3,7 +3,7 @@ import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csc_matrix
 
-class CubeStylier:
+class CubeStylizer:
     
     def __init__(self, mesh_file=None, V=None, F=None) -> None:
         
@@ -95,8 +95,7 @@ class CubeStylier:
                 u += R @ n - z
                 
                 r_norm = np.linalg.norm(z - R @ n)
-                s_norm = np.linalg.norm(-rho * (z - z_old))
-                print(r_norm, s_norm)
+                s_norm = np.linalg.norm(-rho * (z - z_old)) 
                 if r_norm > self.mu * s_norm:
                     rho *= self.tao
                     u /= self.tao
@@ -107,12 +106,12 @@ class CubeStylier:
                 eps_pri = np.sqrt(6) * self.ABSTOL + self.RELTOL * np.maximum(np.linalg.norm(R @ n), np.linalg.norm(z))
                 eps_dual = np.sqrt(3) * self.ABSTOL + self.RELTOL * np.linalg.norm(rho * u)
                 
-                # if r_norm < eps_pri and s_norm < eps_dual:
-                self.zAll[ii] = z
-                self.uAll[ii] = u
-                self.rhoAll[ii] = rho
-                self.RAll[ii] = R
-                #    break
+                if r_norm < eps_pri and s_norm < eps_dual:
+                    self.zAll[ii] = z
+                    self.uAll[ii] = u
+                    self.rhoAll[ii] = rho
+                    self.RAll[ii] = R
+                    break
                 
         Rcol = self.RAll.reshape(NV * 3 * 3, 1, order='F')
         Bcol = self.arap_rhs @ Rcol
@@ -127,10 +126,8 @@ class CubeStylier:
 
         
 def main():
-    cube = CubeStylier("../meshes/bunny.obj")
-
-    cube.iterate(1)
-
+    cube = CubeStylizer("../meshes/bunny.obj")
+    cube.iterate(10)
     igl.write_triangle_mesh("result.obj", cube.U, cube.F)
 
 
