@@ -2,8 +2,6 @@ import taichi as ti
 from scipy.sparse import csc_matrix
 import igl
 import numpy as np
-ti.init(arch=ti.gpu)
-
 
 @ti.data_oriented
 class CubeStylizer:
@@ -13,13 +11,14 @@ class CubeStylizer:
         NV = V.shape[0]
         
         # coefs
-        self.cubeness = 4e-1
+        self.cubeness = ti.field(dtype=ti.f32, shape=())
+        self.cubeness[None] = 4e-1
         self.rho = 1e-4
         self.ABSTOL = 1e-5
         self.RELTOL = 1e-3
         self.mu = 5
         self.tao = 2 
-        self.maxIter_ADMM = 20
+        self.maxIter_ADMM = 10
         
         # arap constraints
         self.handles = np.array([0])
@@ -30,10 +29,6 @@ class CubeStylizer:
         self.L = L
         N = igl.per_vertex_normals(V, F)  # NV * 3
         VA = igl.massmatrix(V, F).diagonal() # NV
-        # vertex_face_adj[vf_indices[i]:vf_indices[i+1]] is the face indices adjacent to V[i]
-        VF, NI = igl.vertex_triangle_adjacency(F, NV)
-        self.max_degree = np.max(NI[1:] - NI[:-1])
-        NI *= 3
         self.arap_rhs = igl.arap_rhs(V, F, 3, igl.ARAP_ENERGY_TYPE_SPOKES_AND_RIMS)
         
         # set_up taichi field for parallelized local step
@@ -46,17 +41,8 @@ class CubeStylizer:
         self.F = ti.field(shape=(F.shape[0] * 3, ), dtype=ti.i32)
         self.F.from_numpy(F.flatten())
         
-        self.vertex_face_adj = ti.field(ti.i32, shape=VF.shape)
-        self.vertex_face_adj.from_numpy(VF)
-        
-        self.vf_indices = ti.field(ti.i32, shape=NI.shape)
-        self.vf_indices.from_numpy(NI)
-        
         self.normals = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f32)
         self.normals.from_numpy(N)
-        
-        self.laplacian = ti.field(ti.f32, shape=(NV, NV))
-        self.laplacian.from_numpy(L.todense())
         
         self.vertex_area = ti.field(ti.f32, shape=(NV, ))
         self.vertex_area.from_numpy(VA)
@@ -67,13 +53,29 @@ class CubeStylizer:
         self.RAll = ti.Matrix.field(n=3, m=3, shape=(NV, ), dtype=ti.f32)
         
         
+        VF, NI = igl.vertex_triangle_adjacency(F, NV)
+        self.NI = ti.field(ti.i32, shape=NI.shape)
+        self.NI.from_numpy(NI * 3)
         
-        self.half_edge_list = ti.Vector.field(n=2, shape=(VF.shape[0] * 3,), dtype=ti.i32)
-        self.W_list = ti.field(ti.f32, shape=(VF.shape[0] * 3,))
-        self.dV_list = ti.Vector.field(n=3, shape=(VF.shape[0] * 3,), dtype=ti.f32)
+        hElist = np.empty((VF.shape[0] * 3, 2), dtype=np.int32)
+        hElist[::3, 0] = F[VF, 0]
+        hElist[1::3, 0] = F[VF, 1]
+        hElist[2::3, 0] = F[VF, 2]
+        hElist[::3, 1] = F[VF, 1]
+        hElist[1::3, 1] = F[VF, 2]
+        hElist[2::3, 1] = F[VF, 0]
+        dVlist = V[hElist[:, 1]] - V[hElist[:, 0]]
+        Wlist = self.L[hElist[:, 1], hElist[:, 0]]
+        Wlist.resize(Wlist.shape[1])
+        
+        self.hElist = ti.Vector.field(n=2, shape=(VF.shape[0] * 3,), dtype=ti.i32)
+        self.hElist.from_numpy(hElist)
+        self.Wlist = ti.field(ti.f32, shape=(VF.shape[0] * 3,))
+        self.Wlist.from_numpy(Wlist)
+        self.dVlist = ti.Vector.field(n=3, shape=(VF.shape[0] * 3,), dtype=ti.f32)
+        self.dVlist.from_numpy(dVlist)
         
         self.reset()
-        self._precompute()
         
     def reset(self):
         self.zAll.fill(0.)
@@ -81,18 +83,6 @@ class CubeStylizer:
         self.rhoAll.fill(self.rho)
         self.RAll.fill(0.)
         self.U.copy_from(self.V)
-        
-    @ti.kernel
-    def _precompute(self):
-        for i in range(self.vertex_face_adj.shape[0]):
-            
-            adj = self.vertex_face_adj[i]
-            for j in range(3):
-                vi0, vi1 = self.F[adj * 3 + j], self.F[adj * 3 + ((j + 1) % 3)]
-                self.half_edge_list[3 * i + j][0] = vi0
-                self.half_edge_list[3 * i + j][1] = vi1
-                self.dV_list[3 * i + j] = self.V[vi1] - self.V[vi0]
-                self.W_list[3 * i + j] = self.laplacian[vi1, vi0]
     
     @staticmethod    
     @ti.func
@@ -109,7 +99,7 @@ class CubeStylizer:
     @staticmethod
     @ti.func
     def shrinkage(x, k):
-        return ti.max(x - k, 0) - ti.max(-x-k, 0)
+        return ti.max(x - k, 0) - ti.max(- x - k, 0)
     
     @ti.kernel
     def fit_rotation_l1(self):
@@ -119,26 +109,22 @@ class CubeStylizer:
             n = self.normals[vi]
             rho = self.rhoAll[vi]
             
-            size = self.vf_indices[vi+1] - self.vf_indices[vi]
-            W = ti.Matrix.zero(dt=ti.f32,n = self.max_degree * 3, m = self.max_degree * 3)
-            dU = ti.Matrix.zero(dt=ti.f32, n=self.max_degree * 3, m=3)
-            dV = ti.Matrix.zero(dt=ti.f32, n=3, m=self.max_degree * 3)
+            size = self.NI[vi+1] - self.NI[vi]
             
+            Spre = ti.Matrix.zero(dt=ti.f32, n=3, m=3)
             for s in range(size):
-                vf_idx = self.vf_indices[vi] + s
-                W[s, s] = self.W_list[vf_idx]
-                
-                u0 = self.U[self.half_edge_list[vf_idx][0]]
-                u1 = self.U[self.half_edge_list[vf_idx][1]]
-                dU[s, :] = u1 - u0
-                dV[:, s] = self.dV_list[vf_idx]
-            Spre = dV @ W @ dU
+                vf_idx = self.NI[vi] + s
+                u0 = self.U[self.hElist[vf_idx][0]]
+                u1 = self.U[self.hElist[vf_idx][1]]
+                wdu = self.Wlist[vf_idx] *(u1 - u0)
+                dv = self.dVlist[vf_idx]
+                Spre += dv.outer_product(wdu)
             
             for _ in range(self.maxIter_ADMM):
                 S = Spre + rho * (n.outer_product(z - u))
                 R = self.fit_R(S)
                 z_old = z
-                z = self.shrinkage(R @ n + u, self.cubeness * self.vertex_area[vi] / rho)
+                z = self.shrinkage(R @ n + u, self.cubeness[None] * self.vertex_area[vi] / rho)
                 u += R @ n - z
                 
                 
@@ -169,34 +155,16 @@ class CubeStylizer:
         for i in range(step_num):
             print(f"\033[34m[INFO] Interation step: {i}\033[0m")
             self.step()
-        
-def main():
-    V, F = igl.read_triangle_mesh("../meshes/bunny.obj")
-    V /= max(V.max(axis=0) - V.min(axis=0))
-    V -= 0.5 * (V.max(axis=0) + V.min(axis=0))
-    cube = CubeStylizer(V=V, F=F)
-    window = ti.ui.Window("Cube Craft", (1280, 960))
-    canvas = window.get_canvas()
-    canvas.set_background_color((1,1,1))
-    scene = ti.ui.Scene()
-    camera = ti.ui.Camera()
-    camera.position(0, -5, 0)
-    camera.lookat(0, 0, 0)
-    
-    
-
-    while window.running:
-        camera.track_user_inputs(window, movement_speed=0.03, hold_key=ti.ui.RMB)
-        scene.set_camera(camera)
-        scene.ambient_light((0.3, 0.3, 0.3))
-        scene.point_light(pos=(0.5, 1.5, 1.5), color=(1, 1, 1))
-        scene.mesh(cube.U, cube.F, cube.normals, color=(1, 0, 0))
-        canvas.scene(scene)
-        window.show()
-        cube.step()
-    
-    # igl.write_triangle_mesh("result.obj", cube.U.to_numpy(), cube.F.to_numpy())
+            
+    def save_mesh(self, path):
+        V = self.U.to_numpy()
+        F = self.F.to_numpy()
+        F = F.reshape(F.shape[0] // 3, 3)
+        igl.write_triangle_mesh(path, V, F)
 
 
 if __name__ == '__main__':
-    main()
+    ti.init(arch=ti.gpu)
+    cube = CubeStylizer("../meshes/bunny.obj")
+    cube.iterate(10)
+    # cube.save_mesh("result.obj")

@@ -43,3 +43,4 @@ result.obj
 .DS_Store
 */.DS_Store
 */__pycache__
+main/imgui.ini
