@@ -12,6 +12,20 @@ class CubeStylizer:
         if mesh_file is not None:
             V, F = igl.read_triangle_mesh(mesh_file)
         NV = V.shape[0]
+        
+        # coefs
+        self.cubeness = 4e-1
+        self.rho = 1e-4
+        self.ABSTOL = 1e-5
+        self.RELTOL = 1e-3
+        self.mu = 5
+        self.tao = 2 
+        self.maxIter_ADMM = 20
+        
+        # arap constraints
+        self.handles = np.array([0])
+        self.handles_pos = V[self.handles]
+        
         # compute necessary geometry properties
         L = igl.cotmatrix(V, F)  # NV * NV sparse
         self.L = L
@@ -22,15 +36,6 @@ class CubeStylizer:
         self.max_degree = np.max(NI[1:] - NI[:-1])
         NI *= 3
         self.arap_rhs = igl.arap_rhs(V, F, 3, igl.ARAP_ENERGY_TYPE_SPOKES_AND_RIMS)
-        
-        # coefs
-        self.cubeness = 4e-1,
-        self.rho = 1e-4,
-        self.ABSTOL = 1e-5,
-        self.RELTOL = 1e-3,
-        self.mu = 5,
-        self.tao = 2, 
-        self.maxIter_ADMM = 20
         
         # set_up taichi field for parallelized local step
         self.V = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f32)
@@ -58,21 +63,25 @@ class CubeStylizer:
         self.vertex_area.from_numpy(VA)
         
         self.zAll = ti.Vector.field(n=3, dtype=ti.f32, shape=(NV,))
-        self.zAll.fill(0.)
-        
         self.uAll = ti.Vector.field(n=3, dtype=ti.f32, shape=(NV,))
-        self.uAll.fill(0.)
-        
         self.rhoAll = ti.field(ti.f32, shape=(NV, ))
-        self.rhoAll.fill(1e-4)
+        self.RAll = ti.Matrix.field(n=3, m=3, shape=(NV, ), dtype=ti.f32)
+        
         
         
         self.half_edge_list = ti.Vector.field(n=2, shape=(VF.shape[0] * 3,), dtype=ti.i32)
         self.W_list = ti.field(ti.f32, shape=(VF.shape[0] * 3,))
         self.dV_list = ti.Vector.field(n=3, shape=(VF.shape[0] * 3,), dtype=ti.f32)
-        self.RAll = ti.Matrix.field(n=3, m=3, shape=(NV, ), dtype=ti.f32)
         
+        self.reset()
         self._precompute()
+        
+    def reset(self):
+        self.zAll.fill(0.)
+        self.uAll.fill(0.)
+        self.rhoAll.fill(self.rho)
+        self.RAll.fill(0.)
+        self.U.copy_from(self.V)
         
     @ti.kernel
     def _precompute(self):
@@ -101,7 +110,7 @@ class CubeStylizer:
     @staticmethod
     @ti.func
     def shrinkage(x, k):
-        return ti.max(x-k[0], 0) - ti.max(-x-k[0], 0)
+        return ti.max(x - k, 0) - ti.max(-x-k, 0)
     
     @ti.kernel
     def fit_rotation_l1(self):
@@ -132,9 +141,10 @@ class CubeStylizer:
                 z_old = z
                 z = self.shrinkage(R @ n + u, self.cubeness * self.vertex_area[vi] / rho)
                 u += R @ n - z
+                
                 r_norm = (z - R @ n).norm()
                 s_norm = (-rho * (z - z_old)).norm()
-                
+                print(r_norm, s_norm)
                 if r_norm > self.mu * s_norm:
                     rho *= self.tao
                     u /= self.tao
@@ -147,17 +157,16 @@ class CubeStylizer:
                 self.rhoAll[vi] = rho
                 self.RAll[vi] = R
     
-    def step(self, b, bc):
+    def step(self):
         Aeq = csc_matrix((0, 0))
         Beq = np.array([])
-        Rcol = self.RAll.to_numpy().reshape(self.V.shape[0] * 3 * 3, 1, order="F")
+        self.fit_rotation_l1()
+        Rcol = self.RAll.to_numpy().reshape(self.V.shape[0] * 3 * 3, 1, order='F')
         Bcol = self.arap_rhs @ Rcol
         B = Bcol.reshape(int(Bcol.shape[0] / 3), 3, order='F')
-        _, U = igl.min_quad_with_fixed(self.L, B, b, bc, Aeq, Beq, False)
+        _, U = igl.min_quad_with_fixed(self.L, B, self.handles, self.handles_pos, Aeq, Beq, False)
         self.U.from_numpy(U)
 cube = CubeStylizer("../meshes/bunny.obj")
-b = np.array([999])
-bc = cube.V[999].to_numpy()[None, :]
-for _ in range(50):
-    cube.step(b, bc)
+for _ in range(1):
+    cube.step()
 igl.write_triangle_mesh("result.obj", cube.U.to_numpy(), cube.F.to_numpy())
