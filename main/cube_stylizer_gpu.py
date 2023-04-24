@@ -43,8 +43,8 @@ class CubeStylizer:
         self.U = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f32)
         self.U.from_numpy(V)
         
-        self.F = ti.Vector.field(n=3, shape=(F.shape[0], ), dtype=ti.i32)
-        self.F.from_numpy(F)
+        self.F = ti.field(shape=(F.shape[0] * 3, ), dtype=ti.i32)
+        self.F.from_numpy(F.flatten())
         
         self.vertex_face_adj = ti.field(ti.i32, shape=VF.shape)
         self.vertex_face_adj.from_numpy(VF)
@@ -88,7 +88,7 @@ class CubeStylizer:
             
             adj = self.vertex_face_adj[i]
             for j in range(3):
-                vi0, vi1 = self.F[adj][j], self.F[adj][(j + 1) % 3]
+                vi0, vi1 = self.F[adj * 3 + j], self.F[adj * 3 + ((j + 1) % 3)]
                 self.half_edge_list[3 * i + j][0] = vi0
                 self.half_edge_list[3 * i + j][1] = vi1
                 self.dV_list[3 * i + j] = self.V[vi1] - self.V[vi0]
@@ -169,13 +169,33 @@ class CubeStylizer:
         for i in range(step_num):
             print(f"\033[34m[INFO] Interation step: {i}\033[0m")
             self.step()
-            
-
         
 def main():
-    cube = CubeStylizer("../meshes/bunny.obj")
-    cube.iterate(10)
-    igl.write_triangle_mesh("result.obj", cube.U.to_numpy(), cube.F.to_numpy())
+    V, F = igl.read_triangle_mesh("../meshes/bunny.obj")
+    V /= max(V.max(axis=0) - V.min(axis=0))
+    V -= 0.5 * (V.max(axis=0) + V.min(axis=0))
+    cube = CubeStylizer(V=V, F=F)
+    window = ti.ui.Window("Cube Craft", (1280, 960))
+    canvas = window.get_canvas()
+    canvas.set_background_color((1,1,1))
+    scene = ti.ui.Scene()
+    camera = ti.ui.Camera()
+    camera.position(0, -5, 0)
+    camera.lookat(0, 0, 0)
+    
+    
+
+    while window.running:
+        camera.track_user_inputs(window, movement_speed=0.03, hold_key=ti.ui.RMB)
+        scene.set_camera(camera)
+        scene.ambient_light((0.3, 0.3, 0.3))
+        scene.point_light(pos=(0.5, 1.5, 1.5), color=(1, 1, 1))
+        scene.mesh(cube.U, cube.F, cube.normals, color=(1, 0, 0))
+        canvas.scene(scene)
+        window.show()
+        cube.step()
+    
+    # igl.write_triangle_mesh("result.obj", cube.U.to_numpy(), cube.F.to_numpy())
 
 
 if __name__ == '__main__':
