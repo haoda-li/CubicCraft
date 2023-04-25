@@ -36,7 +36,7 @@ is based on **Taichi**. Given a mesh, our cubic craft algorithm
 
 - We have created a GUI for users to directly interact with our implemented cubic craft algorithm. This GUI provides sliders 
 for tuning the parameters, including cube orientation and "cubeness". In addition, this GUI has lots of basic
-graphic functions such as displaying wireframe and changing mesh's color. Here is the sample picture
+graphic functions such as displaying wireframes and changing the mesh's color. Here is the sample picture
 for your reference:
 
   ![](assets/bunny_gui.png)
