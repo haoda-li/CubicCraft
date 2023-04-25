@@ -4,18 +4,52 @@ from scipy.sparse import csc_matrix
 import igl
 import numpy as np
 
+# class HandleHelper:
+#     def __init__(self) -> None: 
+#         self.idx = []
+#         self.pos = []
+        
+#     def add_handle()
+
+@ti.data_oriented
+class CoordinateHelper:
+    def __init__(self, size=1.2) -> None:
+        self.V = ti.Vector.field(n=3, shape=(6,), dtype=ti.f32)
+        self.V.fill(0.)
+        self.size = size
+        self.colors = ti.Vector.field(n=3, shape=(6,), dtype=ti.f32)
+        self.colors.from_numpy(np.array([
+            [1, 0, 0], [1, 0, 0], 
+            [0, 1, 0], [0, 1, 0], 
+            [0, 0, 1], [0, 0, 1], 
+        ]))
+ 
+    @ti.kernel
+    def rotate(self, rho: float, theta: float):
+        rot_matrix = tim.rot_yaw_pitch_roll(
+                tim.radians(rho), 
+                tim.radians(theta), 
+                0.
+            )
+        self.V[0] = rot_matrix[:3, 0] * self.size
+        self.V[1] = -rot_matrix[:3, 0] * self.size
+        self.V[2] = rot_matrix[:3, 1] * self.size
+        self.V[3] = -rot_matrix[:3, 1] * self.size
+        self.V[4] = rot_matrix[:3, 2] * self.size
+        self.V[5] = -rot_matrix[:3, 2] * self.size
+        
+        
+
 @ti.data_oriented
 class CubeStylizer:
     def __init__(self, mesh_file=None, V=None, F=None) -> None:
         if mesh_file is not None:
-            V, F = igl.read_triangle_mesh(mesh_file)
+            V, F = self.load_mesh(mesh_file)
         NV = V.shape[0]
         
         # coefs
         self.cubeness = ti.field(dtype=ti.f32, shape=())
         self.cubeness[None] = 4e-1
-        self.euler_angles = ti.field(dtype=ti.f32, shape=(3, ))
-        self.euler_angles.fill(0.)
         self.rho = 1e-4
         self.ABSTOL = 1e-5
         self.RELTOL = 1e-3
@@ -26,6 +60,10 @@ class CubeStylizer:
         # arap constraints
         self.handles = np.array([0])
         self.handles_pos = V[self.handles]
+        
+        # rotation indication
+        self.coordinate_angles = ti.field(dtype=ti.f32, shape=(2, ))
+        self.coordinate_angles.fill(0.)
         
         # compute necessary geometry properties
         L = igl.cotmatrix(V, F)  # NV * NV sparse
@@ -54,7 +92,6 @@ class CubeStylizer:
         self.uAll = ti.Vector.field(n=3, dtype=ti.f32, shape=(NV,))
         self.rhoAll = ti.field(ti.f32, shape=(NV, ))
         self.RAll = ti.Matrix.field(n=3, m=3, shape=(NV, ), dtype=ti.f32)
-        
         
         VF, NI = igl.vertex_triangle_adjacency(F, NV)
         self.NI = ti.field(ti.i32, shape=NI.shape)
@@ -92,11 +129,6 @@ class CubeStylizer:
     def fit_R(S):
         U, X, V = ti.svd(S)
         R = V @ U.transpose()
-        if R.determinant() < 0:
-            U[0, 2] *= -1
-            U[1, 2] *= -1
-            U[2, 2] *= -1
-            R = V @ U.transpose()
         return R
     
     @staticmethod
@@ -110,10 +142,10 @@ class CubeStylizer:
             z = self.zAll[vi]
             u = self.uAll[vi]
             Rot_local = tim.rot_yaw_pitch_roll(
-                tim.radians(self.euler_angles[2]), 
-                tim.radians(self.euler_angles[0]), 
-                tim.radians(self.euler_angles[1])
-            )[:3, :3]
+                tim.radians(self.coordinate_angles[0]), 
+                tim.radians(self.coordinate_angles[1]), 
+                tim.radians(0.)
+            )[:3, :3].transpose()
             n = Rot_local @ self.normals[vi]
             rho = self.rhoAll[vi]
             
@@ -149,6 +181,8 @@ class CubeStylizer:
                 self.uAll[vi] = u
                 self.rhoAll[vi] = rho
                 self.RAll[vi] = R
+                
+                
     def step(self):
         Aeq = csc_matrix((0, 0))
         Beq = np.array([])
@@ -158,17 +192,18 @@ class CubeStylizer:
         B = Bcol.reshape(int(Bcol.shape[0] / 3), 3, order='F')
         _, U = igl.min_quad_with_fixed(self.L, B, self.handles, self.handles_pos, Aeq, Beq, False)
         self.U.from_numpy(U)
-        
-    def iterate(self, step_num=10):
-        for i in range(step_num):
-            print(f"\033[34m[INFO] Interation step: {i}\033[0m")
-            self.step()
             
     def save_mesh(self, path):
         V = self.U.to_numpy()
         F = self.F.to_numpy()
         F = F.reshape(F.shape[0] // 3, 3)
         igl.write_triangle_mesh(path, V, F)
+        
+    def load_mesh(self, path):
+        V, F = igl.read_triangle_mesh(path)
+        V /= max(V.max(axis=0) - V.min(axis=0))
+        V -= 0.5 * (V.max(axis=0) + V.min(axis=0))
+        return V, F
 
 
 if __name__ == '__main__':
