@@ -66,11 +66,6 @@ def controls():
         cube.coordinate_angles[0] = w.slider_float("rho", cube.coordinate_angles[0], 0., 45.)
         cube.coordinate_angles[1] = w.slider_float("theta", cube.coordinate_angles[1], 0., 45.)
         
-        mouse = window.get_cursor_pos()
-        # ...
-        if window.is_pressed(ti.ui.LMB):
-            w.text(f"{mouse[0]}, {mouse[1]}")
-        
         obj_color = w.color_edit_3("mesh color", obj_color)
         if w.button("Save mesh"):
             output_path = f"{input_path_pre}_output_{save_mesh_idx}.{input_ext}"

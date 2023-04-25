@@ -27,8 +27,9 @@ theme:
         name: Light mode
 
 nav:
-  - Proposal: index.md
-  - Milestone: milestone.md
+  - Milestone: index.md
+  - Proposal: proposal.md
+  
 
 plugins:
   - search

@@ -10,65 +10,66 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 
 
 <figure markdown>
-  ![](assets/cubic.jpg)
-  <figcaption>Demonstration figure from Cubic Stylization</figcaption>
+  ![](assets/teaser.png){ width="1080" }
+  <figcaption>Cubic Craft turns triangle meshes (grey) into cubic-styled meshes (green)</figcaption>
 </figure>
 
-## Problem Description
-Non-realistic modeling can provide a unique art style for animations and video games. One of the most popular area for non-realistic modeling is voxel art. The cube-like looking is very interesting and attractive. There are many 3D editing software that can converts arbitrary meshes to voxels. However, voxelization works on local scale and cannot convert the general geometric shape. In our project, we use a cubic stylization algorithm to stylize the object into a cubic shape. Therefore, the object have a cubic look. 
+## External Links
+- [SIGGRAPH styled paper](./assets/cube_craft.pdf)
+- [Our slides](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link)
+- [Our video](https://drive.google.com/file/d/1zCyl1HJOp3MiYYKhZTIQK5oc2nY-kC44/view?usp=share_link)
+- [Our code](https://github.com/haoda-li/CS284A-cubic-craft)
 
-## Goals and Deliverables
+## Install and Run
 
-### What we plan to deliver
+__We highly encourage you try our GUI__. It's based on Python and is very easy to install! The code should support all platforms other than Mac M1 chip.
 
-The final demo will be an interactive GUI for editing and displaying objects. The GUI will provide sliders for tuning the parameters, including cube orientation and "cubeness". Because cubic stylization is based on ARAP energy, ARAP deformation comes for free. The user will also be able to set up handle points and deform the object by dragging the points. The GUI will be able to run in real time and show the object's deformation. In addition, we will have an offline renderer to produce ray tracing based images.
+```bash
+git clone https://github.com/haoda-li/CS284A-cubic-craft.git
+cd CS284A-cubic-craft
 
-We are interested in testing the numerical stability and convergence speed of the cubic stylization algorithm. Also, how creative can the cubic style be. 
+pip install taichi libigl
+cd main
 
-### What we hope to deliver
+# If you have a Mac or your computer does not have a GPU
+# change gui_taichi.py line 6 
+# from ti.init(arch=ti.gpu)
+# to ti.init(arch=ti.cpu)
+python gui_taichi.py [PATH_TO_MESH_FILE]
+```
+## Current Progress
 
-If there are enough time, we are interested in accelerating the algorithm using GPU for more complex meshes. Alternatively, we want to implement mesh decimation so that we we can estimate a simplified mesh, perform cubic stylization, and recover the original mesh after convergence. 
+- We have successfully finished our base-line algorithm of CPU-based and GPU-based cubic stylization. The GPU implementation
+is based on `libigl` and `Taichi`. Given a mesh, our cubic craft algorithm stylizes the object into a cubic shape. Therefore, the object have a cubic look.
+- We provide a graphical interface for the users to visualize and easily edit the meshes. Given a triangle mesh, our graphical interface allows the user to change the parameters in the algorithm, visualize the deformations, and save the resulting mesh.
+- In addition to the cubeness parameter, we notice that cube stylization is orientation dependent. The cubeness is achieved by forcing all vertex normals to align with the three standard axes. If we rotate the input mesh, the output shape will be different. Note that the same effect can be achieved by applying a coordinate transformation on all vertex normals. Therefore, we add the coordinate rotation parameters $(\theta, \phi)$ so that users can have different cube orientations.
+- We did experiments based on several traditional meshes and here are some performance stats:
+  
+| mesh name | number of vertices | CPU time (s) | GPU time (s) |
+| --- | --- | --- | --- |
+| homer | 6002 | 16.03 | 1.77 |
+| bunny | 6172 | 43.23 | 1.96 | 
+| armadillo | 49990 | 370.64 | 7.49 |
 
-In addition, we can allow more controls and creativity. For example, the "cubeness" can be axis-specific so that the final shape is a cuboid (3D rectangle) instead a right cube. Also, we can expand the algorithm to create other polygon shapes. 
+## Future works
+- Currently, the vertex index and positions are hard-coded. In the future, the users will be able to left-click the mesh and place constraints on the deformation. The users will also be able to drag the points to deform it in real time.
+- Optimizing our user-friendly GUI. The cubic stylization algorithm has many hyperparameters that can be experimented with. Currently our GUI just has the uniform cubeness parameter and cube orientation.
+- Preparing for the final showcase. Creating the video, webpage and writing the final report.
 
+## Gallery
+<figure markdown>
+  ![](assets/gui.jpg){ width="720" }
+  <figcaption>Our GUI, the user can view the mesh deformation progress and change parameters</figcaption>
+</figure>
 
-## Schedule
+<figure markdown>
+  ![](assets/lambdas.jpg){ width="1080" }
+  <figcaption>Meshes with different cubeness, we saved our meshes and render them using Blender</figcaption>
+</figure>
 
-### First week
-
-- Read the paper and investigate the reference code.
-- Write code for the basic cubic stylization algorithm.
-
-### Second week
-
-- Finish and test the basic cubic stylization algorithm.
-- Write the GUI interface and include slides for tuning the parameters.
-
-### Third week
-
-- Fix any existing minor bugs or issues.
-- Work on the stretch goal: accelerating the algorithm using GPU, if we have time.
-- Plug into renderer in order to generate images and record videos for deliverables.
-
-### Fourth week
-
-- Finish final deliverables, including project video, project webpage and final paper.
-- Prepare for final demo, including making presentation slides and rehearsal for presentation.
-- Code restructure, improve code readability.
-
-
-## Resources
-We will mainly use C++ for the implementation. Ideally, the code will be cross-platform, but we will mainly target at Windows platform. 
-
-Here is a list of papers and libraries we will use
-
-- [Cubic Stylization](https://arxiv.org/pdf/1910.02926.pdf) [@cubic_style] the algorithm we will use.
-- [As-rigid-as-possible surface modeling](https://igl.ethz.ch/projects/ARAP/arap_web.pdf) [@arap] makes the deformation problem an energy minimization problem, and cubic stylization is augmented on ARAP energy. 
-- [CGAL](https://www.cgal.org/)[@cgal] as the major software platform for CPU implementation. 
-- [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) for linear algebra and sparse solver. 
-- [ImGUI](https://github.com/ocornut/imgui) as the major platform for GUI. 
-- [Taichi language](https://docs.taichi-lang.org/) [@hu2019taichi] If GPU optimization is possible, we can also implement cubic stylization as a Taichi kernel. 
-
-
+<figure markdown>
+  ![](assets/orientation.png){ width="720" }
+  <figcaption>Meshes with different cube orientation</figcaption>
+</figure>
 ## References
 \bibliography
