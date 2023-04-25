@@ -9,10 +9,8 @@
 In this project, we present a stylization tool to automatically manipulate 3D objects into a cubic style. Our tool uses a cubic stylization algorithm [@cubic_style] to cubify the object while preserving the geometric details. With our tool, 3D artists can create Minecraft-styled objects with ease. 
 
 
-<figure markdown>
-  ![](assets/cubic.jpg)
-  <figcaption>Demonstration figure from Cubic Stylization</figcaption>
-</figure>
+![](assets/cubic.jpg)
+*Photo of Minecraft-styled objects*
 
 ## External Links
 
@@ -22,13 +20,20 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 ## Current Progress
 
 - We have successfully finished our base-line algorithm of CPU-based cubic stylization. Given a mesh, our cubic craft algorithm
- stylize the object into a cubic shape. Therefore, the object have a cubic look. We did experiments based
+ stylizes the object into a cubic shape. Therefore, the object have a cubic look. We did experiments based
  on several traditional meshes, such as bunny.obj and armadillo.obj. Here are the sample pictures for reference:
 
-<figure markdown>
-  ![](./assets/cubic.jpg)
-  <figcaption>Demonstration figure from Cubic Stylization</figcaption>
-</figure>
+<img src="assets/bunny.png" alt="Photo of a Cubic Bunny" width="80%" style="display:block; margin:auto;">
+<p style="text-align:center;">
+  <em>Photo of a Cubic Bunny</em>
+</p>
+
+<img src="assets/armadillo.png" alt="Photo of a Cubic Bunny" width="80%" style="display:block; margin:auto;">
+<p style="text-align:center;">
+  <em>Photo of a Cubic Armadillo</em>
+</p>
+
+
 
 - We have created a GUI for users to directly interact with our implemented cubic craft algorithm. This GUI provides sliders 
 for tuning the parameters, including cube orientation and "cubeness". In addition, this GUI has lots of basic
