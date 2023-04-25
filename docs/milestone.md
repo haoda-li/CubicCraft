@@ -10,6 +10,7 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 
 
 ![](assets/cubic.jpg)
+<br/>
 *Photo of Minecraft-styled objects*
 
 ## External Links
@@ -28,7 +29,7 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
   <em>Photo of a Cubic Bunny</em>
 </p>
 
-<img src="assets/armadillo.png" alt="Photo of a Cubic Bunny" width="80%" style="display:block; margin:auto;">
+<img src="assets/armadillo.png" alt="Photo of a Cubic Armadillo" width="80%" style="display:block; margin:auto;">
 <p style="text-align:center;">
   <em>Photo of a Cubic Armadillo</em>
 </p>
@@ -40,10 +41,10 @@ for tuning the parameters, including cube orientation and "cubeness". In additio
 graphic functions such as changing the environment light and changing the mesh's material. Here are the sample pictures
 for your reference:
 
-<figure markdown>
-  ![](assets/cubic.jpg)
-  <figcaption>Demonstration figure from Cubic Stylization</figcaption>
-</figure>
+<img src="assets/bunny_gui.png" alt="Photo of a GUI image" width="80%" style="display:block; margin:auto;">
+<p style="text-align:center;">
+  <em>In the picture, the GUI allows you to display wireframe, toggle cubeness, and change mesh color.</em>
+</p>
 
 ## Future works
 
