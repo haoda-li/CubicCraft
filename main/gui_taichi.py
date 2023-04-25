@@ -57,9 +57,9 @@ def get_options():
         paused = w.checkbox("Paused", paused)
         show_wireframe = w.checkbox("show wireframe", show_wireframe)
         cube.cubeness[None] = w.slider_float("cubeness", cube.cubeness[None], 0., 10.)
-        cube.euler_angles[2] = w.slider_float("yam", cube.euler_angles[2], -90., 90.)
-        cube.euler_angles[0] = w.slider_float("pitch", cube.euler_angles[0], -90., 90.)
-        cube.euler_angles[1] = w.slider_float("roll", cube.euler_angles[1], -90., 90.)
+        cube.euler_angles[0] = w.slider_float("rotate x", cube.euler_angles[0], -90., 90.)
+        cube.euler_angles[1] = w.slider_float("rotate y", cube.euler_angles[1], -90., 90.)
+        cube.euler_angles[2] = w.slider_float("rotate z", cube.euler_angles[2], -90., 90.)
         
         obj_color = w.color_edit_3("mesh color", obj_color)
         # if w.button("Save image"):
