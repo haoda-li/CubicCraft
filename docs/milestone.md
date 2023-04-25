@@ -20,7 +20,8 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 
 ## Current Progress
 
-- We have successfully finished our base-line algorithm of CPU-based cubic stylization. Given a mesh, our cubic craft algorithm
+- We have successfully finished our base-line algorithm of CPU-based and GPU-based cubic stylization. The GPU implementation
+is based on **Taichi**. Given a mesh, our cubic craft algorithm
  stylizes the object into a cubic shape. Therefore, the object have a cubic look. We did experiments based
  on several traditional meshes, such as bunny.obj and armadillo.obj. Here are the sample pictures for reference:
 
@@ -35,7 +36,7 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 
 - We have created a GUI for users to directly interact with our implemented cubic craft algorithm. This GUI provides sliders 
 for tuning the parameters, including cube orientation and "cubeness". In addition, this GUI has lots of basic
-graphic functions such as changing the environment light and changing the mesh's material. Here are the sample pictures
+graphic functions such as displaying wireframe and changing mesh's color. Here is the sample picture
 for your reference:
 
   ![](assets/bunny_gui.png)
@@ -44,11 +45,12 @@ for your reference:
 
 ## Future works
 
-- Our current cubic stylization is CPU-based, which takes a long time to run the algorithm. It will
-take nearly 30 seconds to run 10 iterations on bunny mesh and take several minutes to run 10 iterations on
-armadillo. To accelerate our algorithm, we will utilize Taichi to implement a GPU-based cubic stylization algorithm.
+- Optimizing our user-friendly GUI. The cubic stylization algorithm has many hyperparameters that can be experimented with.
+Currently our GUI just has the cubeness parameter.
 
 - Building handle functions. Based on this functions, users will also be able to set up handle points and deform the object by dragging the points.
+
+- Preparing for the final showcase. Creating the video, webpage and writing the final report.
 
 
 ## References
