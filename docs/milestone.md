@@ -24,16 +24,13 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
  stylizes the object into a cubic shape. Therefore, the object have a cubic look. We did experiments based
  on several traditional meshes, such as bunny.obj and armadillo.obj. Here are the sample pictures for reference:
 
-<img src="assets/bunny.png" alt="Photo of a Cubic Bunny" width="80%" style="display:block; margin:auto;">
-<p style="text-align:center;">
-  <em>Photo of a Cubic Bunny</em>
-</p>
+  ![](assets/bunny.png)
+  <br/>
+  *Photo of a Cubic Bunny*
 
-<img src="assets/armadillo.png" alt="Photo of a Cubic Armadillo" width="80%" style="display:block; margin:auto;">
-<p style="text-align:center;">
-  <em>Photo of a Cubic Armadillo</em>
-</p>
-
+  ![](assets/armadillo.png)
+  <br/>
+  *Photo of a Cubic Armadillo*
 
 
 - We have created a GUI for users to directly interact with our implemented cubic craft algorithm. This GUI provides sliders 
@@ -41,10 +38,9 @@ for tuning the parameters, including cube orientation and "cubeness". In additio
 graphic functions such as changing the environment light and changing the mesh's material. Here are the sample pictures
 for your reference:
 
-<img src="assets/bunny_gui.png" alt="Photo of a GUI image" width="80%" style="display:block; margin:auto;">
-<p style="text-align:center;">
-  <em>In the picture, the GUI allows you to display wireframe, toggle cubeness, and change mesh color.</em>
-</p>
+  ![](assets/bunny_gui.png)
+  <br/>
+  *In the picture, the GUI allows you to display wireframe, toggle cubeness, and change mesh color.*
 
 ## Future works
 
