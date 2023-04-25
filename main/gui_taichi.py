@@ -1,4 +1,5 @@
 import taichi as ti
+import taichi.math as tim
 import igl
 import sys, os
 from cube_stylizer_gpu import CubeStylizer
@@ -39,7 +40,7 @@ def render():
     scene.ambient_light((0.3, 0.3, 0.3))
     scene.point_light(pos=(0.5, 1.5, 1.5), color=(1, 1, 1))
     scene.point_light(pos=(0.5, -1.5, 1.5), color=(1, 1, 1))
-    scene.mesh(cube.U, cube.F, cube.normals, color=obj_color, show_wireframe=show_wireframe)
+    scene.mesh(cube.U, cube.F, color=obj_color, show_wireframe=show_wireframe)
     canvas.scene(scene)
     
 def get_options():
@@ -55,7 +56,11 @@ def get_options():
             cube.reset()
         paused = w.checkbox("Paused", paused)
         show_wireframe = w.checkbox("show wireframe", show_wireframe)
-        cube.cubeness[None] = w.slider_float("cubeness", cube.cubeness[None], 0., 2.)
+        cube.cubeness[None] = w.slider_float("cubeness", cube.cubeness[None], 0., 10.)
+        cube.euler_angles[2] = w.slider_float("yam", cube.euler_angles[2], -90., 90.)
+        cube.euler_angles[0] = w.slider_float("pitch", cube.euler_angles[0], -90., 90.)
+        cube.euler_angles[1] = w.slider_float("roll", cube.euler_angles[1], -90., 90.)
+        
         obj_color = w.color_edit_3("mesh color", obj_color)
         # if w.button("Save image"):
         #     output_path = f"{input_path_pre}_{save_img_idx}.jpg"

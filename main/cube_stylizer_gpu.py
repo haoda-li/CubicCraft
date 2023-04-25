@@ -1,4 +1,5 @@
 import taichi as ti
+import taichi.math as tim
 from scipy.sparse import csc_matrix
 import igl
 import numpy as np
@@ -13,6 +14,8 @@ class CubeStylizer:
         # coefs
         self.cubeness = ti.field(dtype=ti.f32, shape=())
         self.cubeness[None] = 4e-1
+        self.euler_angles = ti.field(dtype=ti.f32, shape=(3, ))
+        self.euler_angles.fill(0.)
         self.rho = 1e-4
         self.ABSTOL = 1e-5
         self.RELTOL = 1e-3
@@ -106,7 +109,12 @@ class CubeStylizer:
         for vi in range(self.V.shape[0]):
             z = self.zAll[vi]
             u = self.uAll[vi]
-            n = self.normals[vi]
+            Rot_local = tim.rot_yaw_pitch_roll(
+                tim.radians(self.euler_angles[2]), 
+                tim.radians(self.euler_angles[0]), 
+                tim.radians(self.euler_angles[1])
+            )[:3, :3]
+            n = Rot_local @ self.normals[vi]
             rho = self.rhoAll[vi]
             
             size = self.NI[vi+1] - self.NI[vi]
