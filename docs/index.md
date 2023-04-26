@@ -17,7 +17,7 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 ## External Links
 - [SIGGRAPH styled paper](./assets/cube_craft.pdf)
 - [Our slides](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link)
-- [Our video](https://drive.google.com/file/d/1zCyl1HJOp3MiYYKhZTIQK5oc2nY-kC44/view?usp=share_link)
+- [Our video](https://drive.google.com/file/d/1twuOx0lY_b68Wo-vGp0ecjrIopT-Xw2n/view?usp=share_link)
 - [Our code](https://github.com/haoda-li/CS284A-cubic-craft)
 
 ## Install and Run
