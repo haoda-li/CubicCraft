@@ -1,7 +1,6 @@
 .idea
 site
 
-meshes/
 blender/
 # Prerequisites
 *.d
