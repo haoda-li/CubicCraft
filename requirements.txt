@@ -1,0 +1,5 @@
+taichi
+scipy
+numpy
+libigl
+tqdm
