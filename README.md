@@ -34,7 +34,7 @@ new mesh with different cubic-stylized extent.
 - Rotate three axises to cubic stylize your mesh in different orientation.
 
 - If you have at least two handle points, you can do experiments with as-rigid-as-possible deformation. Use keyboard
-**UP/DOWN/LEFT/RIGHT** to move your selected handle point and use **SHIFT** to switch to another handle point.
+**UP/DOWN/LEFT/RIGHT/SHIFT/SPACE** to move your selected handle point and use **TAB** to switch to another handle point.
 
 - Use `Save mesh` button to save your favourite cubic-stylized mesh!
 
