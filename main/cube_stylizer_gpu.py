@@ -4,41 +4,7 @@ from scipy.sparse import csc_matrix
 import igl
 import numpy as np
 
-# class HandleHelper:
-#     def __init__(self) -> None: 
-#         self.idx = []
-#         self.pos = []
-        
-#     def add_handle()
 
-@ti.data_oriented
-class CoordinateHelper:
-    def __init__(self, size=1.2) -> None:
-        self.V = ti.Vector.field(n=3, shape=(6,), dtype=ti.f32)
-        self.V.fill(0.)
-        self.size = size
-        self.colors = ti.Vector.field(n=3, shape=(6,), dtype=ti.f32)
-        self.colors.from_numpy(np.array([
-            [1, 0, 0], [1, 0, 0], 
-            [0, 1, 0], [0, 1, 0], 
-            [0, 0, 1], [0, 0, 1], 
-        ]))
- 
-    @ti.kernel
-    def rotate(self, rho: float, theta: float):
-        rot_matrix = tim.rot_yaw_pitch_roll(
-                tim.radians(rho), 
-                tim.radians(theta), 
-                0.
-            )
-        self.V[0] = rot_matrix[:3, 0] * self.size
-        self.V[1] = -rot_matrix[:3, 0] * self.size
-        self.V[2] = rot_matrix[:3, 1] * self.size
-        self.V[3] = -rot_matrix[:3, 1] * self.size
-        self.V[4] = rot_matrix[:3, 2] * self.size
-        self.V[5] = -rot_matrix[:3, 2] * self.size
-        
-        
 
 @ti.data_oriented
 class CubeStylizer:
@@ -48,7 +14,7 @@ class CubeStylizer:
         NV = V.shape[0]
         
         # coefs
-        self.cubeness = ti.field(dtype=ti.f32, shape=())
+        self.cubeness = ti.field(dtype=ti.f64, shape=())
         self.cubeness[None] = 4e-1
         self.rho = 1e-4
         self.ABSTOL = 1e-5
@@ -57,12 +23,8 @@ class CubeStylizer:
         self.tao = 2 
         self.maxIter_ADMM = 10
         
-        # arap constraints
-        self.handles = np.array([0])
-        self.handles_pos = V[self.handles]
-        
         # rotation indication
-        self.coordinate_angles = ti.field(dtype=ti.f32, shape=(2, ))
+        self.coordinate_angles = ti.field(dtype=ti.f64, shape=(3, ))
         self.coordinate_angles.fill(0.)
         
         # compute necessary geometry properties
@@ -73,25 +35,25 @@ class CubeStylizer:
         self.arap_rhs = igl.arap_rhs(V, F, 3, igl.ARAP_ENERGY_TYPE_SPOKES_AND_RIMS)
         
         # set_up taichi field for parallelized local step
-        self.V = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f32)
+        self.V = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f64)
         self.V.from_numpy(V)
         
-        self.U = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f32)
+        self.U = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f64)
         self.U.from_numpy(V)
         
         self.F = ti.field(shape=(F.shape[0] * 3, ), dtype=ti.i32)
         self.F.from_numpy(F.flatten())
         
-        self.normals = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f32)
+        self.normals = ti.Vector.field(n=3, shape=(NV,), dtype=ti.f64)
         self.normals.from_numpy(N)
         
-        self.vertex_area = ti.field(ti.f32, shape=(NV, ))
+        self.vertex_area = ti.field(ti.f64, shape=(NV, ))
         self.vertex_area.from_numpy(VA)
         
-        self.zAll = ti.Vector.field(n=3, dtype=ti.f32, shape=(NV,))
-        self.uAll = ti.Vector.field(n=3, dtype=ti.f32, shape=(NV,))
-        self.rhoAll = ti.field(ti.f32, shape=(NV, ))
-        self.RAll = ti.Matrix.field(n=3, m=3, shape=(NV, ), dtype=ti.f32)
+        self.zAll = ti.Vector.field(n=3, dtype=ti.f64, shape=(NV,))
+        self.uAll = ti.Vector.field(n=3, dtype=ti.f64, shape=(NV,))
+        self.rhoAll = ti.field(ti.f64, shape=(NV, ))
+        self.RAll = ti.Matrix.field(n=3, m=3, shape=(NV, ), dtype=ti.f64)
         
         VF, NI = igl.vertex_triangle_adjacency(F, NV)
         self.NI = ti.field(ti.i32, shape=NI.shape)
@@ -110,9 +72,9 @@ class CubeStylizer:
         
         self.hElist = ti.Vector.field(n=2, shape=(VF.shape[0] * 3,), dtype=ti.i32)
         self.hElist.from_numpy(hElist)
-        self.Wlist = ti.field(ti.f32, shape=(VF.shape[0] * 3,))
+        self.Wlist = ti.field(ti.f64, shape=(VF.shape[0] * 3,))
         self.Wlist.from_numpy(Wlist)
-        self.dVlist = ti.Vector.field(n=3, shape=(VF.shape[0] * 3,), dtype=ti.f32)
+        self.dVlist = ti.Vector.field(n=3, shape=(VF.shape[0] * 3,), dtype=ti.f64)
         self.dVlist.from_numpy(dVlist)
         
         self.reset()
@@ -141,17 +103,17 @@ class CubeStylizer:
         for vi in range(self.V.shape[0]):
             z = self.zAll[vi]
             u = self.uAll[vi]
-            Rot_local = tim.rot_yaw_pitch_roll(
+            Rot_local = tim.rotation3d(
                 tim.radians(self.coordinate_angles[0]), 
                 tim.radians(self.coordinate_angles[1]), 
-                tim.radians(0.)
+                tim.radians(self.coordinate_angles[2])
             )[:3, :3].transpose()
             n = Rot_local @ self.normals[vi]
             rho = self.rhoAll[vi]
             
             size = self.NI[vi+1] - self.NI[vi]
             
-            Spre = ti.Matrix.zero(dt=ti.f32, n=3, m=3)
+            Spre = ti.Matrix.zero(dt=ti.f64, n=3, m=3)
             for s in range(size):
                 vf_idx = self.NI[vi] + s
                 u0 = self.U[self.hElist[vf_idx][0]]
@@ -183,14 +145,14 @@ class CubeStylizer:
                 self.RAll[vi] = R
                 
                 
-    def step(self):
+    def step(self, handles, handles_pos):
         Aeq = csc_matrix((0, 0))
         Beq = np.array([])
         self.fit_rotation_l1()
         Rcol = self.RAll.to_numpy().reshape(self.V.shape[0] * 3 * 3, 1, order='F')
         Bcol = self.arap_rhs @ Rcol
         B = Bcol.reshape(int(Bcol.shape[0] / 3), 3, order='F')
-        _, U = igl.min_quad_with_fixed(self.L, B, self.handles, self.handles_pos, Aeq, Beq, False)
+        _, U = igl.min_quad_with_fixed(self.L, B, handles, handles_pos, Aeq, Beq, False)
         self.U.from_numpy(U)
             
     def save_mesh(self, path):
