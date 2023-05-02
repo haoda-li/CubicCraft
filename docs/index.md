@@ -1,4 +1,9 @@
-# Cubic Craft
+# CubeCraft: A Mesh Stylization Tool
+
+[Report :fontawesome-solid-link:](./report.md){ .md-button .md-button--primary } 
+[Slides :fontawesome-solid-file-powerpoint:](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link){ .md-button .md-button--primary }
+[Demo Video :simple-youtube:](#){ .md-button .md-button--primary }
+[Code :fontawesome-brands-github:](https://github.com/haoda-li/CS284A-cubic-craft){ .md-button .md-button--primary }
 
 [Haoda Li](https://github.com/haoda-li), 
 [Puyuan Yi](https://github.com/JamesYi2953), 
@@ -6,70 +11,45 @@
 [Zhen Jiang](https://github.com/Jz1116), 
 
 
-In this project, we present a stylization tool to automatically manipulate 3D objects into a cubic style. Our tool uses a cubic stylization algorithm [@cubic_style] to cubify the object while preserving the geometric details. With our tool, 3D artists can create Minecraft-styled objects with ease. 
-
-
 <figure markdown>
   ![](assets/teaser.png){ width="1080" }
   <figcaption>Cubic Craft turns triangle meshes (grey) into cubic-styled meshes (green)</figcaption>
 </figure>
 
-## External Links
-- [SIGGRAPH styled paper](./assets/cube_craft.pdf)
-- [Our slides](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link)
-- [Our video](https://drive.google.com/file/d/1twuOx0lY_b68Wo-vGp0ecjrIopT-Xw2n/view?usp=share_link)
-- [Our code](https://github.com/haoda-li/CS284A-cubic-craft)
+In this project, we present a stylization tool to automatically manipulate 3D objects into a cubic style. Our tool provides a GPU implementation for [Cubic Stylization [@cubic_style]]("https://www.dgp.toronto.edu/projects/cubic-stylization/"), while cubify the object while preserving the geometric details. With our tool, 3D artists can create Minecraft-styled objects with ease. 
 
-## Install and Run
 
-__We highly encourage you try our GUI__. It's based on Python and is very easy to install! The code should support all platforms other than Mac M1 chip.
+## Install and Execute
+The code should support all platforms other than Mac M1 chip.
 
 ```bash
 git clone https://github.com/haoda-li/CS284A-cubic-craft.git
 cd CS284A-cubic-craft
 
-pip install taichi libigl
+pip install -r requirements.txt
 cd main
 
 # If you have a Mac or your computer does not have a GPU
 # change gui_taichi.py line 6 
 # from ti.init(arch=ti.gpu)
 # to ti.init(arch=ti.cpu)
-python gui_taichi.py [PATH_TO_MESH_FILE]
+python gui_taichi.py [PATH TO MESH FILE]
 ```
-## Current Progress
 
-- We have successfully finished our base-line algorithm of CPU-based and GPU-based cubic stylization. The GPU implementation
-is based on `libigl` and `Taichi`. Given a mesh, our cubic craft algorithm stylizes the object into a cubic shape. Therefore, the object have a cubic look.
-- We provide a graphical interface for the users to visualize and easily edit the meshes. Given a triangle mesh, our graphical interface allows the user to change the parameters in the algorithm, visualize the deformations, and save the resulting mesh.
-- In addition to the cubeness parameter, we notice that cube stylization is orientation dependent. The cubeness is achieved by forcing all vertex normals to align with the three standard axes. If we rotate the input mesh, the output shape will be different. Note that the same effect can be achieved by applying a coordinate transformation on all vertex normals. Therefore, we add the coordinate rotation parameters $(\theta, \phi)$ so that users can have different cube orientations.
-- We did experiments based on several traditional meshes and here are some performance stats:
-  
-| mesh name | number of vertices | CPU time (s) | GPU time (s) |
-| --- | --- | --- | --- |
-| homer | 6002 | 16.03 | 1.77 |
-| bunny | 6172 | 43.23 | 1.96 | 
-| armadillo | 49990 | 370.64 | 7.49 |
+## GUI Controls
 
-## Future works
-- Currently, the vertex index and positions are hard-coded. In the future, the users will be able to left-click the mesh and place constraints on the deformation. The users will also be able to drag the points to deform it in real time.
-- Optimizing our user-friendly GUI. The cubic stylization algorithm has many hyperparameters that can be experimented with. Currently our GUI just has the uniform cubeness parameter and cube orientation.
-- Preparing for the final showcase. Creating the video, webpage and writing the final report.
+- Use `Preset Camera View` to change to the axis-aligned camera view that you like. You can also press `w, s, a, d, e, q` to move the camera forward, back, left, right, head up, head down, accordingly. In addition, use the right mouse drag to change the camera's viewing angle. 
 
-## Gallery
-<figure markdown>
-  ![](assets/gui.jpg){ width="720" }
-  <figcaption>Our GUI, the user can view the mesh deformation progress and change parameters</figcaption>
-</figure>
+- Press `Enter deformation` button and `LEFT CLICK` the mesh to add new handle points. You can use `BACKSPACE` on your keyboard to delete currently selected handle point (red) and use `TAB` to switch to another handle point. By default, one handle is added to the first vertex because cubic stylization needs at least one constraint.
 
-<figure markdown>
-  ![](assets/lambdas.jpg){ width="1080" }
-  <figcaption>Meshes with different cubeness, we saved our meshes and render them using Blender</figcaption>
-</figure>
+- Use `paused` checkbox to run and pause cubic stylization optimization. If the mesh is too large for real-time optimization, then use `Step` button to manually run one iteration of the optimization. 
 
-<figure markdown>
-  ![](assets/orientation.png){ width="720" }
-  <figcaption>Meshes with different cube orientation</figcaption>
-</figure>
-## References
-\bibliography
+- You can change the `cubeness` parameter to generate new mesh with different cubic-stylized extent.
+
+- Rotate three axes to cubic stylize your mesh in different cube orientation.
+
+- After adding at least two handle points, you can do experiments with as-rigid-as-possible deformation. Use keyboard `UP, DOWN, LEFT, RIGHT, SHIFT, SPACE` to move your selected handle point up, down, left, right, back, and forward __according to the world coordinate__. Use `TAB` to switch between handle points.
+
+- Use `Save mesh` button to save your cubic-stylized mesh, the output mesh will be written to the same directory as the input mesh. 
+
+![GUI](assets/GUI.png)

@@ -1,41 +1,40 @@
-# CS284A-cubic-craft
+# CubeCraft: A Mesh Stylization Tool
 
-This project is a python implementation of <a href="https://www.dgp.toronto.edu/projects/cubic-stylization/">Cubic Stylization [Liu, Jacobson, 2019]</a>.
+A Taichi implementation of [Cubic Stylization [Liu, Jacobson, 2019]]("https://www.dgp.toronto.edu/projects/cubic-stylization/").
 
-## requirements
 
-```
+## Install and Execute
+The code should support all platforms other than Mac M1 chip.
+
+```bash
+git clone https://github.com/haoda-li/CS284A-cubic-craft.git
+cd CS284A-cubic-craft
+
 pip install -r requirements.txt
+cd main
+
+# If you have a Mac or your computer does not have a GPU
+# change gui_taichi.py line 6 
+# from ti.init(arch=ti.gpu)
+# to ti.init(arch=ti.cpu)
+python gui_taichi.py [PATH TO MESH FILE]
 ```
 
-## Execution
 
-Inside the `main` dir, run
+## GUI Controls
 
-```
-python gui_taichi.py [path to mesh.obj]
-```
+- Use `Preset Camera View` to change to the axis-aligned camera view that you like. You can also press `w, s, a, d, e, q` to move the camera forward, back, left, right, head up, head down, accordingly. In addition, use the right mouse drag to change the camera's viewing angle. 
 
-If no mesh is provided, the code will use default mesh _bunny.obj_.
+- Press `Enter deformation` button and `LEFT CLICK` the mesh to add new handle points. You can use `BACKSPACE` on your keyboard to delete currently selected handle point (red) and use `TAB` to switch to another handle point. By default, one handle is added to the first vertex because cubic stylization needs at least one constraint.
 
-## Experiments with GUI
+- Use `paused` checkbox to run and pause cubic stylization optimization. If the mesh is too large for real-time optimization, then use `Step` button to manually run one iteration of the optimization. 
 
-- Use `Preset Camera View` to change to a specifc camera view that you like. You can also use keyboard **Q, W, E, A, S, D** to control the camera.
-You can also show the wireframe of your mesh or change the default mesh color.
+- You can change the `cubeness` parameter to generate new mesh with different cubic-stylized extent.
 
-- Press `Enter deformation` button and left click loaded mesh to add new handle points. You can use **backspace** on your keyboard to delete handle points and
-use **TAB** to switch to another handle point. One default handle point is already added and at least one handle point is needed
-for cubic stylization.
+- Rotate three axes to cubic stylize your mesh in different cube orientation.
 
-- Use `Step` button to cubic stylize your mesh just one iteration or 
-unclick the `paused` button to finish cubic stylization. You can change the `cubeness` parameter to generate
-new mesh with different cubic-stylized extent.
+- After adding at least two handle points, you can do experiments with as-rigid-as-possible deformation. Use keyboard `UP, DOWN, LEFT, RIGHT, SHIFT, SPACE` to move your selected handle point up, down, left, right, back, and forward __according to the world coordinate__. Use `TAB` to switch between handle points.
 
-- Rotate three axises to cubic stylize your mesh in different orientation.
+- Use `Save mesh` button to save your cubic-stylized mesh, the output mesh will be written to the same directory as the input mesh. 
 
-- If you have at least two handle points, you can do experiments with as-rigid-as-possible deformation. Use keyboard
-**UP/DOWN/LEFT/RIGHT/SHIFT/SPACE** to move your selected handle point and use **TAB** to switch to another handle point.
-
-- Use `Save mesh` button to save your favourite cubic-stylized mesh!
-
-![](docs/assets/GUI.png)
+![GUI](docs/assets/GUI.png)

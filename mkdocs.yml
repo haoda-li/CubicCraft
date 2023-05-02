@@ -1,4 +1,4 @@
-site_name: Cubic Craft
+site_name: Cube Craft
 site_description: "CS 284A final project, make a full world into cubes"
 edit_uri: ''
 repo_url: 'https://github.com/haoda-li/CS284A-cubic-craft'
@@ -27,8 +27,11 @@ theme:
         name: Light mode
 
 nav:
-  - Milestone: index.md
-  - Proposal: proposal.md
+  - index.md
+  - SIGGRAPH Styled Report: report.md
+  - gallery.md
+  - "[Archived] Milestone": milestone.md
+  - "[Archived] Proposal": proposal.md
   
 
 plugins:

@@ -124,12 +124,14 @@ class CubeStylizer:
             self.step()
 
 
-        
-def main():
-    cube = CubeStylizer("../meshes/bunny.obj")
-    cube.iterate(10)
-    igl.write_triangle_mesh("result.obj", cube.U, cube.F)
-
-
 if __name__ == '__main__':
-    main()
+    from time import perf_counter
+    from glob import glob
+    
+    for mesh_f in glob("../meshes/*.obj"):
+        start = perf_counter()
+        cube = CubeStylizer(mesh_f)
+        for _ in range(10):
+            cube.step()
+        print(mesh_f, cube.V.shape[0], perf_counter() - start)
+    

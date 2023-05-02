@@ -17,11 +17,9 @@ class CubeStylizer:
         self.cubeness = ti.field(dtype=ti.f64, shape=())
         self.cubeness[None] = 4e-1
         self.rho = 1e-4
-        self.ABSTOL = 1e-5
-        self.RELTOL = 1e-3
-        self.mu = 5
+        self.mu = 10
         self.tao = 2 
-        self.maxIter_ADMM = 10
+        self.ADMM_iter = 50
         
         # rotation indication
         self.coordinate_angles = ti.field(dtype=ti.f64, shape=(3, ))
@@ -122,7 +120,7 @@ class CubeStylizer:
                 dv = self.dVlist[vf_idx]
                 Spre += dv.outer_product(wdu)
             
-            for _ in range(self.maxIter_ADMM):
+            for _ in range(self.ADMM_iter):
                 S = Spre + rho * (n.outer_product(z - u))
                 R = self.fit_R(S)
                 z_old = z
@@ -154,6 +152,8 @@ class CubeStylizer:
         B = Bcol.reshape(int(Bcol.shape[0] / 3), 3, order='F')
         _, U = igl.min_quad_with_fixed(self.L, B, handles, handles_pos, Aeq, Beq, False)
         self.U.from_numpy(U)
+        if self.ADMM_iter > 5:
+            self.ADMM_iter = int(self.ADMM_iter * 0.8) + 1
             
     def save_mesh(self, path):
         V = self.U.to_numpy()
@@ -167,9 +167,17 @@ class CubeStylizer:
         V -= 0.5 * (V.max(axis=0) + V.min(axis=0))
         return V, F
 
-
 if __name__ == '__main__':
+    from time import perf_counter
+    from gui_helpers import HandleHelper
+    from glob import glob
     ti.init(arch=ti.gpu)
-    cube = CubeStylizer("../meshes/bunny.obj")
-    cube.iterate(10)
+    
+    for mesh_f in glob("../meshes/*.obj")[:1]:
+        start = perf_counter()
+        cube = CubeStylizer(mesh_f)
+        handle_helper = HandleHelper(cube.V, cube.F)
+        for _ in range(10):
+            cube.step(handle_helper.handles, handle_helper.handle_pos_np)
+        print(mesh_f, cube.V.shape[0], perf_counter() - start)
     # cube.save_mesh("result.obj")
