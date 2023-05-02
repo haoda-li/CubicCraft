@@ -3,7 +3,7 @@
 [Report :fontawesome-solid-link:](./report.md){ .md-button .md-button--primary } 
 [Slides :fontawesome-solid-file-powerpoint:](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=sharing){ .md-button .md-button--primary }
 [Demo Video :simple-youtube:](https://youtu.be/QIeVmLphMHU){ .md-button .md-button--primary }
-[Code :fontawesome-brands-github:](https://github.com/haoda-li/CS284A-cubic-craft){ .md-button .md-button--primary }
+[Code :fontawesome-brands-github:](https://github.com/haoda-li/CubicCraft){ .md-button .md-button--primary }
 
 [Haoda Li](https://github.com/haoda-li), 
 [Puyuan Yi](https://github.com/JamesYi2953), 
@@ -23,8 +23,8 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 The code should support all platforms other than Mac M1 chip.
 
 ```bash
-git clone https://github.com/haoda-li/CS284A-cubic-craft.git
-cd CS284A-cubic-craft
+git clone https://github.com/haoda-li/CubicCraft.git
+cd CubicCraft
 
 pip install -r requirements.txt
 cd main

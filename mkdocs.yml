@@ -1,8 +1,8 @@
 site_name: CubicCraft
 site_description: "CS 284A final project, make a full world into cubes"
 edit_uri: ''
-repo_url: 'https://github.com/haoda-li/CS284A-cubic-craft'
-repo_name: 'haoda-li/CS284A-cubic-craft'
+repo_url: 'https://github.com/haoda-li/CubicCraft'
+repo_name: 'haoda-li/CubicCraft'
 copyright: 'Copyright &copy; 2023'
 use_directory_urls: true
 

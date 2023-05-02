@@ -18,15 +18,15 @@ In this project, we present a stylization tool to automatically manipulate 3D ob
 - [SIGGRAPH styled paper](./assets/cubic_craft.pdf)
 - [Our slides](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link)
 - [Our video](https://drive.google.com/file/d/1twuOx0lY_b68Wo-vGp0ecjrIopT-Xw2n/view?usp=share_link)
-- [Our code](https://github.com/haoda-li/CS284A-cubic-craft)
+- [Our code](https://github.com/haoda-li/CubicCraft)
 
 ## Install and Run
 
 __We highly encourage you try our GUI__. It's based on Python and is very easy to install! The code should support all platforms other than Mac M1 chip.
 
 ```bash
-git clone https://github.com/haoda-li/CS284A-cubic-craft.git
-cd CS284A-cubic-craft
+git clone https://github.com/haoda-li/CubicCraft.git
+cd CubicCraft
 
 pip install taichi libigl
 cd main
