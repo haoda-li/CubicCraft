@@ -1,18 +1,18 @@
-# CubeCraft: A Mesh Stylization Tool
+# CubicCraft: A Mesh Stylization Tool
 
 [Report :fontawesome-solid-link:](./report.md){ .md-button .md-button--primary } 
-[Slides :fontawesome-solid-file-powerpoint:](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link){ .md-button .md-button--primary }
-[Demo Video :simple-youtube:](#){ .md-button .md-button--primary }
+[Slides :fontawesome-solid-file-powerpoint:](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=sharing){ .md-button .md-button--primary }
+[Demo Video :simple-youtube:](https://youtu.be/QIeVmLphMHU){ .md-button .md-button--primary }
 [Code :fontawesome-brands-github:](https://github.com/haoda-li/CS284A-cubic-craft){ .md-button .md-button--primary }
 
 [Haoda Li](https://github.com/haoda-li), 
 [Puyuan Yi](https://github.com/JamesYi2953), 
 [Victor Li](https://github.com/weiji-li), 
-[Zhen Jiang](https://github.com/Jz1116), 
+[Zhen Jiang](https://github.com/Jz1116)
 
 
 <figure markdown>
-  ![](assets/teaser.png){ width="1080" }
+  ![](assets/teaser.jpg){ width="1080" }
   <figcaption>Cubic Craft turns triangle meshes (grey) into cubic-styled meshes (green)</figcaption>
 </figure>
 
@@ -52,4 +52,4 @@ python gui_taichi.py [PATH TO MESH FILE]
 
 - Use `Save mesh` button to save your cubic-stylized mesh, the output mesh will be written to the same directory as the input mesh. 
 
-![GUI](assets/GUI.png)
+![GUI](assets/gui.jpg)

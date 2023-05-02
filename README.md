@@ -1,4 +1,4 @@
-# CubeCraft: A Mesh Stylization Tool
+# CubicCraft: A Mesh Stylization Tool
 
 A Taichi implementation of [Cubic Stylization [Liu, Jacobson, 2019]](https://www.dgp.toronto.edu/projects/cubic-stylization/).
 
@@ -38,4 +38,4 @@ python gui_taichi.py [PATH TO MESH FILE]
 
 - Use `Save mesh` button to save your cubic-stylized mesh, the output mesh will be written to the same directory as the input mesh. 
 
-![GUI](docs/assets/GUI.png)
+![GUI](docs/assets/gui.jpg)

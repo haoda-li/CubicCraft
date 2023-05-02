@@ -3,19 +3,19 @@
 [Haoda Li](https://github.com/haoda-li), 
 [Puyuan Yi](https://github.com/JamesYi2953), 
 [Victor Li](https://github.com/weiji-li), 
-[Zhen Jiang](https://github.com/Jz1116), 
+[Zhen Jiang](https://github.com/Jz1116)
 
 
 In this project, we present a stylization tool to automatically manipulate 3D objects into a cubic style. Our tool uses a cubic stylization algorithm [@cubic_style] to cubify the object while preserving the geometric details. With our tool, 3D artists can create Minecraft-styled objects with ease. 
 
 
 <figure markdown>
-  ![](assets/teaser.png){ width="1080" }
+  ![](assets/teaser.jpg){ width="1080" }
   <figcaption>Cubic Craft turns triangle meshes (grey) into cubic-styled meshes (green)</figcaption>
 </figure>
 
 ## External Links
-- [SIGGRAPH styled paper](./assets/cube_craft.pdf)
+- [SIGGRAPH styled paper](./assets/cubic_craft.pdf)
 - [Our slides](https://docs.google.com/presentation/d/12iifKoNhjGInhJqSMDu6pAhNFBX3i4AgdjXz3iN-nas/edit?usp=share_link)
 - [Our video](https://drive.google.com/file/d/1twuOx0lY_b68Wo-vGp0ecjrIopT-Xw2n/view?usp=share_link)
 - [Our code](https://github.com/haoda-li/CS284A-cubic-craft)
@@ -42,7 +42,7 @@ python gui_taichi.py [PATH_TO_MESH_FILE]
 - We have successfully finished our base-line algorithm of CPU-based and GPU-based cubic stylization. The GPU implementation
 is based on `libigl` and `Taichi`. Given a mesh, our cubic craft algorithm stylizes the object into a cubic shape. Therefore, the object have a cubic look.
 - We provide a graphical interface for the users to visualize and easily edit the meshes. Given a triangle mesh, our graphical interface allows the user to change the parameters in the algorithm, visualize the deformations, and save the resulting mesh.
-- In addition to the cubeness parameter, we notice that cube stylization is orientation dependent. The cubeness is achieved by forcing all vertex normals to align with the three standard axes. If we rotate the input mesh, the output shape will be different. Note that the same effect can be achieved by applying a coordinate transformation on all vertex normals. Therefore, we add the coordinate rotation parameters $(\theta, \phi)$ so that users can have different cube orientations.
+- In addition to the cubeness parameter, we notice that cubic stylization is orientation dependent. The cubeness is achieved by forcing all vertex normals to align with the three standard axes. If we rotate the input mesh, the output shape will be different. Note that the same effect can be achieved by applying a coordinate transformation on all vertex normals. Therefore, we add the coordinate rotation parameters $(\theta, \phi)$ so that users can have different cube orientations.
 - We did experiments based on several traditional meshes and here are some performance stats:
   
 | mesh name | number of vertices | CPU time (s) | GPU time (s) |
@@ -68,7 +68,7 @@ is based on `libigl` and `Taichi`. Given a mesh, our cubic craft algorithm styli
 </figure>
 
 <figure markdown>
-  ![](assets/orientation.png){ width="720" }
+  ![](assets/orientation.jpg){ width="720" }
   <figcaption>Meshes with different cube orientation</figcaption>
 </figure>
 ## References
