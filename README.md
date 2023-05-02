@@ -2,6 +2,7 @@
 
 A Taichi implementation of [Cubic Stylization [Liu, Jacobson, 2019]](https://www.dgp.toronto.edu/projects/cubic-stylization/).
 
+[Project Page](https://haoda-li.github.io/CS284A-cubic-craft/)
 
 ## Install and Execute
 The code should support all platforms other than Mac M1 chip.
