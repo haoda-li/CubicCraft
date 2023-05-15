@@ -7,7 +7,7 @@
 
 
 <center><video width="1080" height="720" controls>
-  <source src="/assets/gui_real_time.mp4" type="video/mp4">
+  <source src="../assets/gui_real_time.mp4" type="video/mp4">
 </video></center>
 <figure markdown>
   <figcaption>Our GUI, the user can view the mesh deformation progress and change parameters</figcaption>
