@@ -30,8 +30,6 @@ nav:
   - index.md
   - SIGGRAPH Styled Report: report.md
   - gallery.md
-  - "[Archived] Milestone": milestone.md
-  - "[Archived] Proposal": proposal.md
   
 
 plugins:
