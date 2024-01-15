@@ -1,4 +1,4 @@
-# CubicCraft: A Mesh Stylization Tool
+# CubicCraft: A Mesh Stylization Tool 
 
 A Taichi implementation of [Cubic Stylization [Liu, Jacobson, 2019]](https://www.dgp.toronto.edu/projects/cubic-stylization/).
 
